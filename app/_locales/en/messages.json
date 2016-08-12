@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "My S3 Browser",
+    "description": "The name of the application"
+  },
+  "appDescription": {
+    "message": "A Modern S3 Browser with AWS JS SDK",
+    "description": "The description of the application"
+  }
+}
