@@ -8,8 +8,8 @@ var message = {
     name: 'hello'
 };
 
-var s3 = ''
-var prefix = ''
+var s3 = '';
+var prefix = '';
 
 renderer.postMessage(message, '*');
 
@@ -25,7 +25,7 @@ window.addEventListener('message', function(event) {
 
 
 function listBuckets(s3, s3Bucket) {
-    if (window.console) { console.log("Done"); }
+    if (window.console) { console.log('Done'); }
     s3.listBuckets(function(err, buckets) {
         if (err) {
             if (window.console) { console.log(err, err.stack); } // an error occurred
@@ -36,7 +36,7 @@ function listBuckets(s3, s3Bucket) {
             $.each(buckets.Buckets, function(i, bucket) {
                 var option = document.createElement('option');
                 option.text = bucket.Name;
-                if (s3Bucket === "") { s3Bucket = bucket.Name}
+                if (s3Bucket === '') { s3Bucket = bucket.Name}
                 if (s3Bucket === bucket.Name) { $(option).attr('selected', true); }
                 select.append(option);
             });
@@ -77,7 +77,7 @@ function listBuckets(s3, s3Bucket) {
 }
 
 function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
-    if (window.console) { console.log("s3://", s3Bucket, "/",  prefix, s3.endpoint.hostname); }
+    if (window.console) { console.log('s3://', s3Bucket, '/',  prefix, s3.endpoint.hostname); }
     var prefix = s3_prefix;
     var marker = s3_marker;
     var params = {

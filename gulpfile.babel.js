@@ -1,4 +1,4 @@
-// generated on 2016-01-26 using generator-chrome-extension 0.5.1
+// generated on 2016-10-18 using generator-chrome-extension 0.6.1
 import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import del from 'del';
@@ -51,17 +51,13 @@ gulp.task('images', () => {
 });
 
 gulp.task('html',  () => {
-  const assets = $.useref.assets({searchPath: ['.tmp', 'app', '.']});
-
   return gulp.src('app/*.html')
-    .pipe(assets)
+    .pipe($.useref({searchPath: ['.tmp', 'app', '.']}))
     .pipe($.sourcemaps.init())
     .pipe($.if('*.js', $.uglify()))
-    .pipe($.if('*.css', $.minifyCss({compatibility: '*'})))
+    .pipe($.if('*.css', $.cleanCss({compatibility: '*'})))
     .pipe($.sourcemaps.write())
-    .pipe(assets.restore())
-    .pipe($.useref())
-    .pipe($.if('*.html', $.minifyHtml({conditionals: true, loose: true})))
+    .pipe($.if('*.html', $.htmlmin({removeComments: true, collapseWhitespace: true})))
     .pipe(gulp.dest('dist'));
 });
 
@@ -76,7 +72,7 @@ gulp.task('chromeManifest', () => {
         ]
       }
   }))
-  .pipe($.if('*.css', $.minifyCss({compatibility: '*'})))
+  .pipe($.if('*.css', $.cleanCss({compatibility: '*'})))
   .pipe($.if('*.js', $.sourcemaps.init()))
   .pipe($.if('*.js', $.uglify()))
   .pipe($.if('*.js', $.sourcemaps.write('.')))
@@ -93,7 +89,7 @@ gulp.task('babel', () => {
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
-gulp.task('watch', ['lint', 'babel', 'html'], () => {
+gulp.task('watch', ['lint', 'babel'], () => {
   $.livereload.listen();
 
   gulp.watch([
@@ -122,8 +118,8 @@ gulp.task('wiredep', () => {
 
 gulp.task('package', function () {
   var manifest = require('./dist/manifest.json');
-  return gulp.src('dist/*')
-      .pipe($.zip('My S3 Browser-' + manifest.version + '.zip'))
+  return gulp.src('dist/**')
+      .pipe($.zip('my s3 browser-' + manifest.version + '.zip'))
       .pipe(gulp.dest('package'));
 });
 
