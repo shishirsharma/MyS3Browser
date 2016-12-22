@@ -9,3 +9,6 @@ package
 app/scripts
 app.crx
 app.pem
+app.zip
+.DS_Store
+

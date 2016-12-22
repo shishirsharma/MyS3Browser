@@ -10,6 +10,7 @@ var message = {
 
 var s3 = '';
 var prefix = '';
+var state = {};
 
 renderer.postMessage(message, '*');
 
@@ -36,7 +37,7 @@ function listBuckets(s3, s3Bucket) {
             $.each(buckets.Buckets, function(i, bucket) {
                 var option = document.createElement('option');
                 option.text = bucket.Name;
-                if (s3Bucket === '') { s3Bucket = bucket.Name}
+                if (s3Bucket === '') { s3Bucket = bucket.Name; }
                 if (s3Bucket === bucket.Name) { $(option).attr('selected', true); }
                 select.append(option);
             });
@@ -85,20 +86,20 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
         Delimiter: '/',
         Prefix: decodeURIComponent(prefix),
         Marker: marker,
-        EncodingType: 'url'
-//        MaxKeys: 
+        EncodingType: 'url',
+        MaxKeys: 30
     };
     if (window.console) { console.log(prefix, marker); }           // successful response
-
+    state = {s3Bucket: s3Bucket, prefix: prefix, marker: marker };
     s3.listObjects(params, function(err, files) {
         if (err) {
             // an error occurred
             if (window.console) { console.log(err, err.stack); }
         }
         else {
-            if (window.console) { console.log(files); }           // successful response
-
             // successful response
+            if (window.console) { console.log(files); }
+
             $('#fileTable').empty();
             var tr = $('<tr>');
             $.each(['Key', 'Last Updated', 'Size'], function(i, header){
@@ -111,7 +112,7 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
             $.each(files.CommonPrefixes, function(i, folder) {
                 var a = document.createElement('a');
                 var strong = document.createElement('strong');
-                strong.textContent = decodeURIComponent(folder.Prefix.replace(prefix, ''))
+                strong.textContent = decodeURIComponent(folder.Prefix.replace(prefix, ''));
                 $('<tr>').attr(
                     'id', i
                 ).append(
@@ -155,7 +156,7 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
             if(files.IsTruncated) {
                 var a = document.createElement('a');
                 var strong = document.createElement('strong');
-                strong.textContent = 'next'
+                strong.textContent = 'next';
                 $('<tr>').attr(
                     'id', 'next'
                 ).append(
@@ -234,6 +235,9 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
             }
 
             $('a.s3-folder').click(function () {
+                // window.location.hash = s3_prefix+marker;
+                window.history.pushState(state, state.s3_prefix+state.marker, '#'+state.s3_prefix+state.marker);
+
                 var prefix = $(this).attr('data-prefix');
                 var marker = $(this).attr('data-marker');
                 listObjects(s3, s3Bucket, prefix, marker);
@@ -243,16 +247,11 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
 }
 
 
-
-
 function main() {
-    var accessKeyId = ''
-    var secretAccessKey = ''
+    var accessKeyId = '';
+    var secretAccessKey = '';
     var s3Region = '';
     var s3Bucket = '';
-
-    // var s3 = '';
-
     var p1 = new Promise(function(resolve, reject) {
         chrome.storage.local.get('access-key-id', function(result) {
             accessKeyId = result['access-key-id'];
@@ -270,7 +269,7 @@ function main() {
                 resolve(true);
             });
         });
-    })
+    });
     var p3 = p2.then(function(val) {
         return new Promise(function(resolve, reject) {
             chrome.storage.local.get('s3-region', function(result) {
@@ -303,7 +302,6 @@ function main() {
             resolve(true);
         });
     });
-
     var p6 = p5.then(function(val) {
         return new Promise(function(resolve, reject) {
             var params = {
@@ -324,7 +322,6 @@ function main() {
             });
         });
     });
-
     p6.then(function(val) {
         return new Promise(function(resolve, reject) {
             listBuckets(s3, s3Bucket);
@@ -332,7 +329,6 @@ function main() {
             resolve(true);
         });
     });
-
 }
 
 function setup() {
@@ -363,7 +359,7 @@ function setup() {
     $('#btnUpload').click(function() {
         var fileChooser = $('#file-chooser')[0];
         var awsKey = $('#aws-key')[0].value;
-        
+
         if (window.console) { console.log('awsKey :', awsKey, ' prefix : ', prefix); }
         if (window.console) { console.log('getting file object'); }
 
@@ -385,7 +381,6 @@ function setup() {
             if (window.console) { console.log('nothing to upload'); }
         }
     });
-    
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -395,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var first_run = result['first_run'];
             if (window.console) { console.log('[chrome.storage] get first_run ', first_run); }
             if (first_run) {
-                reject(true)
+                reject(true);
             } else {
                 resolve(true);
             }
@@ -404,9 +399,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var p2 = p1.then(function(val) {
         main();
     }).catch(function(reason) {
-        $('#credentialModal').modal('show')        
+        $('#credentialModal').modal('show');
     });
+    window.onpopstate = function(event) {
+        if (event.state) {
+            // listBuckets(event.state.s3, event.state.s3Bucket);
+            listObjects(s3, event.state.s3Bucket, event.state.prefix, event.state.marker);
+            console.log('location: ' + document.location + ', state: ' + JSON.stringify(event.state));
+        }
+    };
 });
-
-
-
