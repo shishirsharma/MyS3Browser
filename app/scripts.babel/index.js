@@ -1,29 +1,28 @@
 'use strict';
 
-var renderer = document.getElementById('theFrame').contentWindow;
-
-var message = {
-    command: 'render',
-    context: {thing: 'world'},
-    name: 'hello'
-};
-
 var s3 = '';
 var prefix = '';
 var state = {};
 
-renderer.postMessage(message, '*');
+// var message = {
+//     command: 'render',
+//     context: {thing: 'world'},
+//     name: 'hello'
+// };
 
-window.addEventListener('message', function(event) {
-    if (event.data.html) {
-        new Notification('Templated!', {
-            icon: 'icon.png',
-            body: 'HTML Received for "' + event.data.name + '": `' +
-                event.data.html + '`'
-        });
-    }
-});
+// var renderer = document.getElementById('theFrame').contentWindow;
 
+// renderer.postMessage(message, '*');
+
+// window.addEventListener('message', function(event) {
+//     if (event.data.html) {
+//         new Notification('Templated!', {
+//             icon: 'icon.png',
+//             body: 'HTML Received for "' + event.data.name + '": `' +
+//                 event.data.html + '`'
+//         });
+//     }
+// });
 
 function listBuckets(s3, s3Bucket) {
     if (window.console) { console.log('Done'); }
@@ -403,9 +402,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     window.onpopstate = function(event) {
         if (event.state) {
-            // listBuckets(event.state.s3, event.state.s3Bucket);
+            // listBuckets(s3, event.state.s3Bucket);
             listObjects(s3, event.state.s3Bucket, event.state.prefix, event.state.marker);
             console.log('location: ' + document.location + ', state: ' + JSON.stringify(event.state));
         }
     };
 });
+
+  
