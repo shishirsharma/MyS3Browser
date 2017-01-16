@@ -79,6 +79,7 @@ function listBuckets(s3, s3Bucket) {
 function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
     if (window.console) { console.log('s3://', s3Bucket, '/',  prefix, s3.endpoint.hostname); }
     var prefix = s3_prefix;
+    var search_prefix = '';
     var marker = s3_marker;
     var params = {
         Bucket: s3Bucket,
@@ -90,6 +91,9 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
     };
     if (window.console) { console.log(prefix, marker); }           // successful response
     state = {s3Bucket: s3Bucket, prefix: prefix, marker: marker };
+    var tags = prefix.trim().split('/');
+    search_prefix = tags.pop(); // Remove empty element due to last slash
+
     s3.listObjects(params, function(err, files) {
         if (err) {
             // an error occurred
@@ -144,7 +148,7 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
                     $('<td>').html(
                         $(a).attr(
                             'href', s3.getSignedUrl('getObject', {Bucket: s3Bucket, Key: decodeURIComponent(file.Key.replace('+', ' '))})
-                        ).text(decodeURIComponent(file.Key.replace('+', ' ').replace(prefix, '')))
+                        ).text(decodeURIComponent(search_prefix+file.Key.replace('+', ' ').replace(prefix, '')))
                     )
                 ).append(
                     $('<td>').html(file.LastModified)
@@ -183,9 +187,6 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
                 ).appendTo(tbody);
             }
             tbody.appendTo('#fileTable');
-
-            var tags = prefix.trim().split('/');
-            tags.pop(); // Remove empty element due to last comma
 
             if (window.console) { console.log('[listObjects] [tags] values: ' + tags); }
             if (window.console) { console.log('[listObjects] [tags] length: ' + tags.length); }
@@ -235,7 +236,7 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
 
             $('a.s3-folder').click(function () {
                 // window.location.hash = s3_prefix+marker;
-                window.history.pushState(state, state.s3_prefix+state.marker, '#'+state.s3_prefix+state.marker);
+                window.history.pushState(state, state.s3_prefix+state.marker);
 
                 prefix = $(this).attr('data-prefix');
                 var marker = $(this).attr('data-marker');
@@ -381,9 +382,10 @@ function setup() {
         }
     });
     $('#buckets-search').click(function() {
-        var search_query = $('#buckets-search-query');
-        state.prefix =  state.prefix + search_query;
-        listObjects(s3, state.s3Bucket, state.prefix);
+        var search_query = $('#buckets-search-query').val();
+        var tags = state.prefix.split('/');
+        tags.pop();
+        var search_prefix = listObjects(s3, state.s3Bucket, tags.join('/') + '/' + search_query);
     });
 }
 
@@ -413,4 +415,4 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 });
- 
+
