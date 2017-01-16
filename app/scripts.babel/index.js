@@ -195,8 +195,8 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
             var a = document.createElement('a');
 
             if (tags.length >= 1) {
-                $('#prefix-breadcrumb').append(
-                    $(li).append(
+                $('#prefix-breadcrumb').attr('class', 'breadcrumb').append(
+                    $(li).attr('class', 'breadcrumb-item').append(
                         $(a).attr('class', 's3-folder').attr('data-prefix', '').attr('href', '#').text(decodeURIComponent('s3://' + s3Bucket))
                     )
                 );
@@ -208,14 +208,14 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
                     if (i === (len - 1)) {
                         if (window.console) { console.log('[listObjects] [loop] last ' + i); }
 
-                        $('#prefix-breadcrumb').append(
-                            $(li).attr('class', 'active').text(decodeURIComponent(elem))
+                        $('#prefix-breadcrumb').attr('class', 'breadcrumb').append(
+                            $(li).attr('class', 'breadcrumb-item active').text(decodeURIComponent(elem))
                         );
                     } else {
                         if (window.console) { console.log('[listObjects] [loop] ' + i); }
 
-                        $('#prefix-breadcrumb').append(
-                            $(li).append(
+                        $('#prefix-breadcrumb').attr('class', 'breadcrumb').append(
+                            $(li).attr('class', 'breadcrumb-item').append(
                                 $(a).attr(
                                     'class', 's3-folder'
                                 ).attr(
@@ -228,8 +228,8 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
                     }
                 });
             } else {
-                $('#prefix-breadcrumb').append(
-                    $(li).attr('class', 'active').text(decodeURIComponent('s3://' + s3Bucket))
+                $('#prefix-breadcrumb').attr('class', 'breadcrumb').append(
+                    $(li).attr('class', 'breadcrumb-item').attr('class', 'active').text(decodeURIComponent('s3://' + s3Bucket))
                 );
             }
 
@@ -237,7 +237,7 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
                 // window.location.hash = s3_prefix+marker;
                 window.history.pushState(state, state.s3_prefix+state.marker, '#'+state.s3_prefix+state.marker);
 
-                var prefix = $(this).attr('data-prefix');
+                prefix = $(this).attr('data-prefix');
                 var marker = $(this).attr('data-marker');
                 listObjects(s3, s3Bucket, prefix, marker);
             });
@@ -379,6 +379,11 @@ function setup() {
         } else {
             if (window.console) { console.log('nothing to upload'); }
         }
+    });
+    $('#buckets-search').click(function() {
+        var search_query = $('#buckets-search-query');
+        state.prefix =  state.prefix + search_query;
+        listObjects(s3, state.s3Bucket, state.prefix);
     });
 }
 
