@@ -235,12 +235,13 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
             }
 
             $('a.s3-folder').click(function () {
-                // window.location.hash = s3_prefix+marker;
-                window.history.pushState(state, state.s3_prefix+state.marker);
+                // window.location.hash = state.prefix+':'+state.marker;
 
                 prefix = $(this).attr('data-prefix');
                 var marker = $(this).attr('data-marker');
                 listObjects(s3, s3Bucket, prefix, marker);
+                window.history.pushState(state, state.prefix+':'+state.marker);
+
             });
         }
     });
@@ -386,6 +387,7 @@ function setup() {
         var tags = state.prefix.split('/');
         tags.pop();
         var search_prefix = listObjects(s3, state.s3Bucket, tags.join('/') + '/' + search_query);
+        window.history.pushState(state, state.prefix+':'+state.marker);
     });
 }
 
