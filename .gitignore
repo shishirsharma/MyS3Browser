@@ -12,3 +12,5 @@ app.pem
 app.zip
 .DS_Store
 dist.zip
+
+*.codekit
