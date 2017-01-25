@@ -3,6 +3,7 @@ Modern S3 Browser with AWS JS SDK
 
 ## What it does ##
 
+
 This is a chrome extention to access and upload AWS S3 files.
 
 ### Why we need one more S3 file access plugin ###
@@ -26,4 +27,11 @@ Yes.
 
 
 # Local Setup
-* `$`
+## Local Setup
+* Checkout code
+* `$ npm install && bower install`
+* `$ gulp watch`
+
+## Build/Package
+* `$ gulp build package`
+

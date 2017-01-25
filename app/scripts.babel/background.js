@@ -9,13 +9,9 @@ chrome.browserAction.onClicked.addListener(function() {
 });
 
 chrome.runtime.onInstalled.addListener(function() {
-    chrome.storage.local.set({'first_run': true}, function() {
-      if (window.console) { console.log('[chrome.storage] set first_run'); }
-    });
+  chrome.storage.local.set({'first_run': true}, function() {
+    if (window.console) { console.log('[chrome.storage] set first_run'); }
+  });
 });
 
-// chrome.tabs.onUpdated.addListener(tabId => {
-//   chrome.pageAction.show(tabId);
-// });
-
-if (window.console) { console.log('\'Allo \'Allo! Event Page'); }
+console.log('\'Allo \'Allo! Event Page for Page Action');

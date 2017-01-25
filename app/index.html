@@ -1,189 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <!-- Required meta tags -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-  <title>My S3 Browser</title>
-  <link rel="shortcut icon" type="image/x-icon" href="images/favicon-72.png">
-  <script src="libs/pace/pace-v1.0.2.min.js"></script>
-  <!-- <link href="libs/pace/themes/blue/pace-theme-minimal.css" rel="stylesheet" /> -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-  <!-- <link rel="stylesheet" href="css/font-awesome.min.css"> -->
-  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-  <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Condensed|Roboto+Slab" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="styles/main.css">
-  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/css/select2.min.css" rel="stylesheet" /> -->
-</head>
-<body>
-  <header class="navbar navbar-light navbar-toggleable-md">
-    <div class="collapse navbar-collapse">
-      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <a class="navbar-brand" href="#">
-        <i class="fa fa-cloud-upload" aria-hidden="true"></i>&nbsp;My S3 Browser
-      </a>
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <title>My S3 Browser</title>
+        <link rel="shortcut icon" type="image/x-icon" href="images/favicon-72.png">
 
-      <div class="collapse navbar-collapse navbar-options" id="navbarSupportedContent">
-        <form class="form-inline my-2 my-lg-0">
-          <select class="form-control" id="buckets-select"></select>
-          <button type="button" class="btn btn-link" data-toggle="modal" data-target="#credentialModal">
-            <i class="fa fa-cog" aria-hidden="true"></i>
-          </button>
-          <button type="button" class="btn btn-link" data-toggle="modal" data-target="#helpModal">
-            <i class="fa fa-question" aria-hidden="true"></i>
-          </button>
-        </form>
-      </div>
-    </div>
-  </header>
-  <div class="container-fluid">
-    <div>
-      <ol id="prefix-breadcrumb" class="breadcrumb">
-      </ol>
-    </div>
-    <div class="well">
-      <ul class="navbar-nav mr-auto bucket-tools">
-        <li class="nav-item active pull-left">
-          <button type="button" class="btn btn-primary btn-upload" data-toggle="modal" data-target="#uploadModal">
-            <i class="fa fa-upload" aria-hidden="true"></i>
-          </button>
-        </li>
-        <li class="nav-item pull-left">
-          <div class="input-group nav-item">
-            <input id="buckets-search-query" type="text" class="form-control" placeholder="Search current folder">
-            <span class="input-group-btn">
-              <button id="buckets-search" class="btn btn-default" type="button">
-                <i class="fa fa-search" aria-hidden="true"></i>
-              </button>
-            </span>
-          </div><!-- /input-group -->
-        </li>
-      </ul>
-      <table id="fileTable" class="table">
-      </table>
-    </div>
-  </div>
+        <!-- build:css styles/index-vendor.css -->
+        <!-- bower:css -->
+        <!-- endbower -->
+        <!-- endbuild -->
+        <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Condensed|Roboto+Slab" rel="stylesheet">
 
-  <!-- Modal -->
-  <div class="modal fade" id="credentialModal" tabindex="-1" role="credential-dialog" aria-labelledby="credentialModalLabel">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="credentialModalLabel">Credentials</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <!-- build:css styles/main.css -->
+        <link href="styles/main.css" rel="stylesheet">
+        <!-- endbuild -->
+    </head>
+    <body>
+        <header class="navbar navbar-light navbar-toggleable-md">
+            <div class="collapse navbar-collapse">
+                <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <a class="navbar-brand" href="#">
+                    <i class="fa fa-cloud-upload" aria-hidden="true"></i>&nbsp;My S3 Browser
+                </a>
 
+                <div class="collapse navbar-collapse navbar-options" id="navbarSupportedContent">
+                    <form class="form-inline my-2 my-lg-0">
+                        <select class="form-control" id="buckets-select"></select>
+                        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#credentialModal">
+                            <i class="fa fa-cog" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="btn btn-link" data-toggle="modal" data-target="#helpModal">
+                            <i class="fa fa-question" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </header>
+        <div class="container-fluid">
+            <div>
+                <ol id="prefix-breadcrumb" class="breadcrumb">
+                </ol>
+            </div>
+            <div class="well">
+                <ul class="navbar-nav mr-auto bucket-tools">
+                    <li class="nav-item active pull-left">
+                        <button type="button" class="btn btn-primary btn-upload" data-toggle="modal" data-target="#uploadModal">
+                            <i class="fa fa-upload" aria-hidden="true"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item pull-left">
+                        <div class="input-group nav-item">
+                            <input id="buckets-search-query" type="text" class="form-control" placeholder="Search current folder">
+                            <span class="input-group-btn">
+                                <button id="buckets-search" class="btn btn-default" type="button">
+                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                </button>
+                            </span>
+                        </div><!-- /input-group -->
+                    </li>
+                </ul>
+                <table id="fileTable" class="table">
+                </table>
+            </div>
         </div>
-        <div class="modal-body">
-          <form class="form-horizontal">
-            <div class="form-group">
-              <label class="col-sm-4 control-label" for="input-access-key-id">Access Key Id</label>
-              <div class="col-sm-8">
-                <input type="text" class="form-control" id="access-key-id" placeholder="Access Key Id">
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="col-sm-4 control-label" for="input-secret-access-key">Secret Access Key</label>
-              <div class="col-sm-8">
-                <input type="text" class="form-control" id="secret-access-key" placeholder="Secret Access Key">
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="col-sm-4 control-label" for="input-bucket">Bucket</label>
-              <div class="col-sm-8">
-                <input type="text" class="form-control" id="s3-bucket" placeholder="Bucket">
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="col-sm-4 control-label" for="input-region">Region</label>
-              <div class="col-sm-8">
-                <input type="text" class="form-control" id="s3-region" placeholder="Region">
-              </div>
-            </div>
-          </form>
 
-          <div class="modal-footer">
-            <!-- <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> -->
-            <button id="btnSaveChange" type="button" data-dismiss="modal" class="btn btn-primary">Save changes</button>
-          </div>
+        <!-- Modal -->
+        <div class="modal fade" id="credentialModal" tabindex="-1" role="credential-dialog" aria-labelledby="credentialModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="credentialModalLabel">Credentials</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="input-access-key-id">Access Key Id</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="access-key-id" placeholder="Access Key Id">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="input-secret-access-key">Secret Access Key</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="secret-access-key" placeholder="Secret Access Key">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="input-bucket">Bucket</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="s3-bucket" placeholder="Bucket">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label" for="input-region">Region</label>
+                                <div class="col-sm-8">
+                                    <input type="text" class="form-control" id="s3-region" placeholder="Region">
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="modal-footer">
+                            <!-- <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> -->
+                            <button id="btnSaveChange" type="button" data-dismiss="modal" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </div>
-  <!-- Modal -->
-  <div class="modal fade" id="uploadModal" tabindex="-1" role="upload-dialog" aria-labelledby="uploadModalLabel">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="uploadModalLabel">Upload</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <!-- Modal -->
+        <div class="modal fade" id="uploadModal" tabindex="-1" role="upload-dialog" aria-labelledby="uploadModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="uploadModalLabel">Upload</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 
-        </div>
-        <div class="modal-body">
-          <form class="form-horizontal">
-            <div class="form-group">
-              <input type="text" class="form-control" id="aws-key" placeholder="File Name">
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="aws-key" placeholder="File Name">
+                            </div>
+                            <div class="form-group">
+                                <label class="custom-file">
+                                    <input type="file" id="file-chooser" class="custom-file-input">
+                                    <span class="custom-file-control"></span>
+                                </label>
+                            </div>
+                        </form>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button id="btnUpload" type="button" class="btn btn-primary">Upload</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-              <label class="custom-file">
-                <input type="file" id="file-chooser" class="custom-file-input">
-                <span class="custom-file-control"></span>
-              </label>
-            </div>
-          </form>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button id="btnUpload" type="button" class="btn btn-primary">Upload</button>
-          </div>
         </div>
-      </div>
-    </div>
-  </div>
-  <!-- Modal -->
-  <div class="modal fade" id="helpModal" tabindex="-1" role="help-dialog" aria-labelledby="helpModalLabel">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="uploadModalLabel">My S3 Browser</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="row">
-            <div class="col-sm-4">
+        <!-- Modal -->
+        <div class="modal fade" id="helpModal" tabindex="-1" role="help-dialog" aria-labelledby="helpModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="uploadModalLabel">My S3 Browser</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-4">
 
+                            </div>
+                            <div class="col-sm-8">
+
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-sm-8">
-
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          </div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <iframe id="theFrame" class="hidden-xl-down" src="sandbox.html"></iframe>
+        <iframe id="theFrame" class="hidden-xl-down" src="sandbox.html"></iframe>
 
-  <!-- Latest compiled and minified JavaScript -->
-        <!-- <script type="text/javascript" src="libs/jquery-2.1.4.min.js"></script>
-        <script type="text/javascript" src="libs/bootstrap-3.3.6.min.js"></script> -->
-        <!-- <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-             <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-             <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script> -->
 
-             <script type="text/javascript" src="libs/jquery-3.1.1.slim.min.js"></script>
-             <script type="text/javascript" src="libs/tether.min.js"></script>
-             <script type="text/javascript" src="libs/bootstrap-4.0.0-alpha.6.min.js"></script>
-             <script type="text/javascript" src="libs/aws-sdk-v2.7.14.min.js"></script>
-             <!-- <script type="text/javascript" src="libs/select2-v4.0.1.min.js "></script> -->
-             <script type="text/javascript" src="scripts/index.js"></script>
-           </body>
-           </html>
+        <!-- Latest compiled and minified JavaScript -->
+
+        <!-- build:js scripts/combined-index.js -->
+        <!-- bower:js -->
+        <script src="bower_components/jquery/dist/jquery.js"></script>
+        <script src="bower_components/tether/dist/js/tether.js"></script>
+        <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="bower_components/handlebars/handlebars.js"></script>
+        <script src="bower_components/PACE/pace.js"></script>
+        <script src="bower_components/select2/dist/js/select2.js"></script>
+        <script src="bower_components/aws-sdk/dist/aws-sdk.js"></script>
+        <!-- endbower -->
+        <!-- endbuild -->
+
+        <!-- build:js scripts/index.js -->
+        <script type="text/javascript" src="scripts/index.js"></script>
+        <!-- endbuild -->
+    </body>
+</html>

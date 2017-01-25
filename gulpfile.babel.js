@@ -1,4 +1,4 @@
-// generated on 2016-10-18 using generator-chrome-extension 0.6.1
+// generated on 2017-01-18 using generator-chrome-extension 0.6.1
 import gulp from 'gulp';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import del from 'del';
@@ -11,13 +11,10 @@ gulp.task('extras', () => {
   return gulp.src([
     'app/*.*',
     'app/_locales/**',
-    'app/libs/**',
-    'app/css/**',
-    'app/fonts/**',
-    'app/scripts/index.js',
     '!app/scripts.babel',
     '!app/*.json',
     '!app/*.html',
+    '!app/styles.scss'
   ], {
     base: 'app',
     dot: true
@@ -47,14 +44,25 @@ gulp.task('images', () => {
       // as hooks for embedding and styling
       svgoPlugins: [{cleanupIDs: false}]
     }))
-    .on('error', function (err) {
-      console.log(err);
-      this.end();
-    })))
+               .on('error', function (err) {
+                 console.log(err);
+                 this.end();
+               })))
     .pipe(gulp.dest('dist/images'));
 });
 
-gulp.task('html',  () => {
+gulp.task('styles', () => {
+  return gulp.src('app/styles.scss/*.scss')
+    .pipe($.plumber())
+    .pipe($.sass.sync({
+      outputStyle: 'expanded',
+      precision: 10,
+      includePaths: ['.']
+    }).on('error', $.sass.logError))
+    .pipe(gulp.dest('app/styles'));
+});
+
+gulp.task('html', ['styles'], () => {
   return gulp.src('app/*.html')
     .pipe($.useref({searchPath: ['.tmp', 'app', '.']}))
     .pipe($.sourcemaps.init())
@@ -75,20 +83,20 @@ gulp.task('chromeManifest', () => {
           'scripts/chromereload.js'
         ]
       }
-  }))
-  .pipe($.if('*.css', $.cleanCss({compatibility: '*'})))
-  .pipe($.if('*.js', $.sourcemaps.init()))
-  .pipe($.if('*.js', $.uglify()))
-  .pipe($.if('*.js', $.sourcemaps.write('.')))
-  .pipe(gulp.dest('dist'));
+    }))
+    .pipe($.if('*.css', $.cleanCss({compatibility: '*'})))
+    .pipe($.if('*.js', $.sourcemaps.init()))
+    .pipe($.if('*.js', $.uglify()))
+    .pipe($.if('*.js', $.sourcemaps.write('.')))
+    .pipe(gulp.dest('dist'));
 });
 
 gulp.task('babel', () => {
   return gulp.src('app/scripts.babel/**/*.js')
-      .pipe($.babel({
-        presets: ['es2015']
-      }))
-      .pipe(gulp.dest('app/scripts'));
+    .pipe($.babel({
+      presets: ['es2015']
+    }))
+    .pipe(gulp.dest('app/scripts'));
 });
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
@@ -105,6 +113,7 @@ gulp.task('watch', ['lint', 'babel'], () => {
   ]).on('change', $.livereload.reload);
 
   gulp.watch('app/scripts.babel/**/*.js', ['lint', 'babel']);
+  gulp.watch('app/styles.scss/**/*.scss', ['styles']);
   gulp.watch('bower.json', ['wiredep']);
 });
 
@@ -113,6 +122,9 @@ gulp.task('size', () => {
 });
 
 gulp.task('wiredep', () => {
+  gulp.src('app/styles.scss/*.scss')
+    .pipe(wiredep())
+    .pipe(gulp.dest('app/styles.scss/'));
   gulp.src('app/*.html')
     .pipe(wiredep({
       ignorePath: /^(\.\.\/)*\.\./
@@ -123,8 +135,8 @@ gulp.task('wiredep', () => {
 gulp.task('package', function () {
   var manifest = require('./dist/manifest.json');
   return gulp.src('dist/**')
-      .pipe($.zip('my s3 browser-' + manifest.version + '.zip'))
-      .pipe(gulp.dest('package'));
+    .pipe($.zip('my s3 browser-' + manifest.version + '.zip'))
+    .pipe(gulp.dest('package'));
 });
 
 gulp.task('build', (cb) => {

@@ -1,9 +1,32 @@
 <!doctype html>
 <html>
     <head>
-        <script src="libs/handlebars-v4.0.5.js"></script>
+        <!-- build:css styles/sandbox-vendor.css -->
+        <!-- bower:css -->
+        <!-- endbower -->
+        <!-- endbuild -->
+        <!-- build:css styles/main.css -->
+        <link href="styles/main.css" rel="stylesheet">
+        <!-- endbuild -->
+
     </head>
     <body>
+
+
+        <!-- build:js scripts/sandbox-vendor.js -->
+        <!-- bower:js -->
+        <script src="bower_components/jquery/dist/jquery.js"></script>
+        <script src="bower_components/tether/dist/js/tether.js"></script>
+        <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="bower_components/handlebars/handlebars.js"></script>
+        <script src="bower_components/PACE/pace.js"></script>
+        <script src="bower_components/select2/dist/js/select2.js"></script>
+        <script src="bower_components/aws-sdk/dist/aws-sdk.js"></script>
+        <!-- endbower -->
+        <!-- endbuild -->
+
+        <!-- build:js scripts/sandbox.js -->
+
         <script id="hello-world-template" type="text/x-handlebars-template">
             <div class="entry">
                 <h1>Hello, {{thing}}!</h1>
@@ -36,5 +59,7 @@
              }
          });
         </script>
+        <!-- endbuild -->
+
     </body>
 </html>

@@ -147,6 +147,10 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
                 ).append(
                     $('<td>').html(
                         $(a).attr(
+                            'class', 'link-icon'
+                        ).attr(
+                            'filename', decodeURIComponent(search_prefix+file.Key.replace('+', ' ').replace(prefix, ''))
+                        ).attr(
                             'href', s3.getSignedUrl('getObject', {Bucket: s3Bucket, Key: decodeURIComponent(file.Key.replace('+', ' '))})
                         ).text(decodeURIComponent(search_prefix+file.Key.replace('+', ' ').replace(prefix, '')))
                     )
