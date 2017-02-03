@@ -24,6 +24,22 @@ var state = {};
 //     }
 // });
 
+function humanFileSize(bytes, si) {
+    var thresh = si ? 1000 : 1024;
+    if(Math.abs(bytes) < thresh) {
+        return bytes + ' B';
+    }
+    var units = si
+            ? ['KB','MB','GB','TB','PB','EB','ZB','YB']
+            : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+    var u = -1;
+    do {
+        bytes /= thresh;
+        ++u;
+    } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+    return bytes.toFixed(1)+' '+units[u];
+}
+
 function listBuckets(s3, s3Bucket) {
     if (window.console) { console.log('Done'); }
     s3.listBuckets(function(err, buckets) {
@@ -157,7 +173,7 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
                 ).append(
                     $('<td>').html(file.LastModified)
                 ).append(
-                    $('<td>').html(file.Size)
+                    $('<td>').html(humanFileSize(file.Size, true))
                 ).appendTo(tbody);
             });
             if(files.IsTruncated) {
@@ -386,12 +402,20 @@ function setup() {
             if (window.console) { console.log('nothing to upload'); }
         }
     });
-    $('#buckets-search').click(function() {
+    function aws_prefix_search() {
         var search_query = $('#buckets-search-query').val();
         var tags = state.prefix.split('/');
         tags.pop();
         var search_prefix = listObjects(s3, state.s3Bucket, tags.join('/') + '/' + search_query);
         window.history.pushState(state, state.prefix+':'+state.marker);
+    }
+    $('#buckets-search').click(function() {
+        aws_prefix_search();
+    });
+    $('#buckets-search-query').keydown(function(e) {
+        var keypressed = event.keyCode || event.which;
+        // Enter is pressed
+        if (keypressed == 13) { aws_prefix_search(); }
     });
 }
 
