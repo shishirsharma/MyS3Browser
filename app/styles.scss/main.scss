@@ -5,6 +5,10 @@
 @import "../bower_components/select2/src/scss/core.scss";
 // endbower
 
+.form-group.required .control-label:after {
+    content:"*";
+    color:red;
+}
 
 .navbar {
   background: #000;

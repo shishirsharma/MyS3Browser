@@ -354,6 +354,16 @@ function main() {
 
 function setup() {
     $('#btnSaveChange').click(function() {
+        var $myForm = $('#formCredentials');
+        if (!$myForm[0].checkValidity()) {
+            // If the form is invalid, submit it. The form won't actually submit;
+            // this will just cause the browser to display the native HTML5 error messages.
+            $myForm.find(':submit').click();
+        } else {
+            $('#formCredentials').submit();
+        }
+    });
+    $('#formCredentials').submit(function(event) {
         if (window.console) { console.log('attampting chrome.storage data updation'); }
         var accessKeyId = $('#access-key-id')[0].value;
         chrome.storage.local.set({'access-key-id': accessKeyId}, function() {
@@ -391,13 +401,14 @@ function setup() {
                 Key: awsKey,
                 ContentType: file.type,
                 Body: file,
-                Bucket: s3Bucket
+                Bucket: state.s3Bucket
             };
             if (window.console) { console.log('Started upload'); }
             s3.upload(params, function(err, data) {
                 if (window.console) { console.log(err ? 'ERROR!' : 'UPLOADED.'); }
                 if (window.console) { console.log('Finished upload' + data); }
             });
+            return true;
         } else {
             if (window.console) { console.log('nothing to upload'); }
         }

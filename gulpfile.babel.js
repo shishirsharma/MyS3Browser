@@ -43,11 +43,10 @@ gulp.task('images', () => {
       // don't remove IDs from SVGs, they are often used
       // as hooks for embedding and styling
       svgoPlugins: [{cleanupIDs: false}]
-    }))
-               .on('error', function (err) {
-                 console.log(err);
-                 this.end();
-               })))
+    })).on('error', function (err) {
+      console.log(err);
+      this.end();
+    })))
     .pipe(gulp.dest('dist/images'));
 });
 
@@ -60,6 +59,13 @@ gulp.task('styles', () => {
       includePaths: ['.']
     }).on('error', $.sass.logError))
     .pipe(gulp.dest('app/styles'));
+});
+
+gulp.task('fonts', () => {
+  return gulp.src('app/bower_components/**/*.{eot,svg,ttf,woff,woff2}')
+    .pipe($.flatten())
+    .pipe(gulp.dest('app/fonts'))
+    .pipe(gulp.dest('dist/fonts'));
 });
 
 gulp.task('html', ['styles'], () => {
@@ -108,7 +114,7 @@ gulp.task('watch', ['lint', 'babel'], () => {
     'app/*.html',
     'app/scripts/**/*.js',
     'app/images/**/*',
-    'app/styles/**/*',
+    'app/styles/**/*.css',
     'app/_locales/**/*.json'
   ]).on('change', $.livereload.reload);
 
@@ -142,7 +148,7 @@ gulp.task('package', function () {
 gulp.task('build', (cb) => {
   runSequence(
     'lint', 'babel', 'chromeManifest',
-    ['html', 'images', 'extras'],
+    ['html', 'images', 'extras', 'fonts'],
     'size', cb);
 });
 
