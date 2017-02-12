@@ -3,26 +3,7 @@
 var s3 = '';
 var prefix = '';
 var state = {};
-
-// var message = {
-//     command: 'render',
-//     context: {thing: 'world'},
-//     name: 'hello'
-// };
-
-// var renderer = document.getElementById('theFrame').contentWindow;
-
-// renderer.postMessage(message, '*');
-
-// window.addEventListener('message', function(event) {
-//     if (event.data.html) {
-//         new Notification('Templated!', {
-//             icon: 'icon.png',
-//             body: 'HTML Received for "' + event.data.name + '": `' +
-//                 event.data.html + '`'
-//         });
-//     }
-// });
+var renderer = {};
 
 function humanFileSize(bytes, si) {
     var thresh = si ? 1000 : 1024;
@@ -30,8 +11,8 @@ function humanFileSize(bytes, si) {
         return bytes + ' B';
     }
     var units = si
-            ? ['KB','MB','GB','TB','PB','EB','ZB','YB']
-            : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+        ? ['KB','MB','GB','TB','PB','EB','ZB','YB']
+        : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
     var u = -1;
     do {
         bytes /= thresh;
@@ -40,28 +21,46 @@ function humanFileSize(bytes, si) {
     return bytes.toFixed(1)+' '+units[u];
 }
 
-function listBuckets(s3, s3Bucket) {
-    if (window.console) { console.log('Done'); }
+function listBuckets(s3, s3Bucket, callback) {
+    if (window.console) { console.log('[function.listBuckets]', 'starting'); }
     s3.listBuckets(function(err, buckets) {
         if (err) {
             if (window.console) { console.log(err, err.stack); } // an error occurred
+            // Make sure the callback is a function
+            if (typeof callback === 'function') {
+                // Call it, since we have confirmed it is callable
+                callback(err=true);
+            }
+
         } else {
-            if (window.console) { console.log(buckets); }           // successful response
+            if (window.console) { console.log('[function.listBuckets]', 'Buckets', buckets.Buckets.length); }
+            // successful response
             var select = $('#buckets-select').empty();
 
             $.each(buckets.Buckets, function(i, bucket) {
                 var option = document.createElement('option');
                 option.text = bucket.Name;
-                if (s3Bucket === '') { s3Bucket = bucket.Name; }
+                if (s3Bucket === '') {
+                    s3Bucket = bucket.Name;
+                    // chrome.storage.local.set({'s3-bucket': bucket.Name }, function() {
+                    //     if (window.console) { console.log('[chrome.storage]', 's3-bucket updated'); }
+                    // });
+                }
                 if (s3Bucket === bucket.Name) { $(option).attr('selected', true); }
                 select.append(option);
             });
+
+            // Make sure the callback is a function
+            if (typeof callback === 'function') {
+                // Call it, since we have confirmed it is callable
+                callback(err=false);
+            }
 
             select.change(function() {
                 var s3Bucket = select.val();
                 if (window.console) { console.log(s3Bucket); }           // successful response
                 chrome.storage.local.set({'s3-bucket': s3Bucket}, function() {
-                    if (window.console) { console.log('[chrome.storage] s3-bucket updated'); }
+                    if (window.console) { console.log('[chrome.storage]', 's3-bucket updated'); }
                 });
                 var s3Region = '';
 
@@ -74,7 +73,7 @@ function listBuckets(s3, s3Bucket) {
                             if (window.console) { console.log(err, err.stack); } // an error occurred
                         } else {
                             s3Region = data.LocationConstraint;
-                            if(window.console) { console.log(data); }            // successful response
+                            if (window.console) { console.log('[function.listBuckets]', 's3-region updated'); } // successful response
                             resolve(true);
                         }
                     });
@@ -83,7 +82,7 @@ function listBuckets(s3, s3Bucket) {
                     return new Promise(function(resolve, reject) {
                         AWS.config.region = s3Region;
                         s3 = new AWS.S3();
-
+                        if(window.console)  { console.log('[function.listBuckets]', 'listObjects', s3Bucket); }
                         listObjects(s3, s3Bucket, '');
                     });
                 });
@@ -92,9 +91,12 @@ function listBuckets(s3, s3Bucket) {
     });
 }
 
-function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
-    if (window.console) { console.log('s3://', s3Bucket, '/',  prefix, s3.endpoint.hostname); }
+function listObjects(s3, s3_bucket, s3_prefix, s3_marker='', callback) {
     var prefix = s3_prefix;
+    var s3Bucket = s3_bucket;
+    if(s3_bucket == '') {
+        s3Bucket = $('#buckets-select').val();
+    }
     var search_prefix = '';
     var marker = s3_marker;
     var params = {
@@ -105,7 +107,7 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
         EncodingType: 'url',
         MaxKeys: 30
     };
-    if (window.console) { console.log(prefix, marker); }           // successful response
+    if (window.console) { console.log('[function.listObjects]', 's3://' + s3Bucket +  '.' + s3.endpoint.hostname + '/' + prefix + '#' + marker ); }
     state = {s3Bucket: s3Bucket, prefix: prefix, marker: marker };
     var tags = prefix.trim().split('/');
     search_prefix = tags.pop(); // Remove empty element due to last slash
@@ -114,156 +116,75 @@ function listObjects(s3, s3Bucket, s3_prefix, s3_marker='') {
         if (err) {
             // an error occurred
             if (window.console) { console.log(err, err.stack); }
+            // Make sure the callback is a function
+            if (typeof callback === 'function') {
+                // Call it, since we have confirmed it is callable
+                callback(err=true);
+            }
         }
         else {
             // successful response
-            if (window.console) { console.log(files); }
+            if (window.console) { console.log('[function.listObjects]', 'Folders:', files.CommonPrefixes.length, 'Files:', files.Contents.length); }
 
-            $('#fileTable').empty();
-            var tr = $('<tr>');
-            $.each(['Key', 'Last Updated', 'Size'], function(i, header){
-                tr.append(
-                    $('<th>').text(header)
-                );
+
+            var folders_context = files.CommonPrefixes.map(function(obj) {
+                var map = {};
+                map['prefix'] = obj.Prefix;
+                map['name'] = obj.Prefix.replace(prefix, '');
+                return map;
             });
-            $('<thead>').append(tr).appendTo('#fileTable');
-            var tbody = $(document.createElement('tbody'));
-            $.each(files.CommonPrefixes, function(i, folder) {
-                var a = document.createElement('a');
-                var strong = document.createElement('strong');
-                strong.textContent = decodeURIComponent(folder.Prefix.replace(prefix, ''));
-                $('<tr>').attr(
-                    'id', i
-                ).append(
-                    $('<td>').attr(
-                        'id', 'folder_'+i
-                    ).append(
-                        '<span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> '
-                    ).append(
-                        $(a).attr(
-                            'class', 's3-folder'
-                        ).attr(
-                            'data-prefix', folder.Prefix
-                        ).attr(
-                            'href','#'
-                        ).append(
-                            strong
-                        )
-                    )
-                ).append(
-                    $('<td>').text('')
-                ).append(
-                    $('<td>').text('')
-                ).appendTo(tbody);
+            var files_context = files.Contents.map(function(obj) {
+                var map = {};
+                map['filename'] = decodeURIComponent(search_prefix+obj.Key.replace('+', ' ').replace(prefix, ''));
+                map['href'] = s3.getSignedUrl('getObject', {Bucket: s3Bucket, Key: decodeURIComponent(obj.Key.replace('+', ' '))});
+                map['prefix'] = obj.Prefix;
+                map['LastModified'] = obj.LastModified;
+                map['size'] = humanFileSize(obj.Size, true);
+                return map;
             });
-            $.each(files.Contents, function(i, file) {
-                var a = document.createElement('a');
-                $('<tr>').attr(
-                    'id', i
-                ).append(
-                    $('<td>').html(
-                        $(a).attr(
-                            'class', 'link-icon'
-                        ).attr(
-                            'filename', decodeURIComponent(search_prefix+file.Key.replace('+', ' ').replace(prefix, ''))
-                        ).attr(
-                            'href', s3.getSignedUrl('getObject', {Bucket: s3Bucket, Key: decodeURIComponent(file.Key.replace('+', ' '))})
-                        ).text(decodeURIComponent(search_prefix+file.Key.replace('+', ' ').replace(prefix, '')))
-                    )
-                ).append(
-                    $('<td>').html(file.LastModified)
-                ).append(
-                    $('<td>').html(humanFileSize(file.Size, true))
-                ).appendTo(tbody);
-            });
-            if(files.IsTruncated) {
-                var a = document.createElement('a');
-                var strong = document.createElement('strong');
-                strong.textContent = 'next';
-                $('<tr>').attr(
-                    'id', 'next'
-                ).append(
-                    $('<td>').attr(
-                        'id', 'next'
-                    ).append(
-                        '<span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> '
-                    ).append(
-                        $(a).attr(
-                            'class', 's3-folder'
-                        ).attr(
-                            'data-prefix', prefix
-                        ).attr(
-                            'data-marker', files.NextMarker
-                        ).attr(
-                            'href','#'
-                        ).append(
-                            strong
-                        )
-                    )
-                ).append(
-                    $('<td>').text('')
-                ).append(
-                    $('<td>').text('')
-                ).appendTo(tbody);
+            var isTruncated = false;
+            if (files.IsTruncated) {
+                isTruncated = {marker: files.NextMarker};
             }
-            tbody.appendTo('#fileTable');
+            renderer.postMessage({
+                command: 'render', context: {
+                    folders: folders_context, files: files_context, isTruncated: isTruncated
+                }, name: 'main-table'
+            }, '*');
 
             if (window.console) { console.log('[listObjects] [tags] values: ' + tags); }
             if (window.console) { console.log('[listObjects] [tags] length: ' + tags.length); }
 
-            $('#prefix-breadcrumb').empty();
-            var li = document.createElement('li');
-            var a = document.createElement('a');
 
-            if (tags.length >= 1) {
-                $('#prefix-breadcrumb').attr('class', 'breadcrumb').append(
-                    $(li).attr('class', 'breadcrumb-item').append(
-                        $(a).attr('class', 's3-folder').attr('data-prefix', '').attr('href', '#').text(decodeURIComponent('s3://' + s3Bucket))
-                    )
-                );
-
-                var len = tags.length;
-                $.each(tags, function(i, elem){
-                    var a = document.createElement('a');
-                    li = document.createElement('li');
-                    if (i === (len - 1)) {
-                        if (window.console) { console.log('[listObjects] [loop] last ' + i); }
-
-                        $('#prefix-breadcrumb').attr('class', 'breadcrumb').append(
-                            $(li).attr('class', 'breadcrumb-item active').text(decodeURIComponent(elem))
-                        );
-                    } else {
-                        if (window.console) { console.log('[listObjects] [loop] ' + i); }
-
-                        $('#prefix-breadcrumb').attr('class', 'breadcrumb').append(
-                            $(li).attr('class', 'breadcrumb-item').append(
-                                $(a).attr(
-                                    'class', 's3-folder'
-                                ).attr(
-                                    'data-prefix', tags.slice(0,i+1).join('/')+'/'
-                                ).attr(
-                                    'href', '#'
-                                ).text(decodeURIComponent(elem))
-                            )
-                        );
-                    }
+            var crumbs = [];
+            if (tags.length > 1) {
+                tags.forEach(function(currentValue, index, array) {
+                    crumbs.push({
+                        prefix: decodeURIComponent('s3://' + s3Bucket) + '/' + array.slice(0,index+1).join('/')+'/',
+                        name: currentValue
+                    });
                 });
-            } else {
-                $('#prefix-breadcrumb').attr('class', 'breadcrumb').append(
-                    $(li).attr('class', 'breadcrumb-item').attr('class', 'active').text(decodeURIComponent('s3://' + s3Bucket))
-                );
+                crumbs.pop();
             }
 
-            $('a.s3-folder').click(function () {
-                // window.location.hash = state.prefix+':'+state.marker;
+            renderer.postMessage({
+                command: 'render',
+                context: {
+                    root: 's3://' + s3Bucket,
+                    crumbs: crumbs,
+                    active: tags.pop()
+                },
+                name: 'top-breadcrumb'
+            }, '*');
 
-                prefix = $(this).attr('data-prefix');
-                var marker = $(this).attr('data-marker');
-                listObjects(s3, s3Bucket, prefix, marker);
-                window.history.pushState(state, state.prefix+':'+state.marker);
+            // Make sure the callback is a function
+            if (typeof callback === 'function') {
+                // Call it, since we have confirmed it is callable
+                callback(err=false);
+            }
 
-            });
         }
+
     });
 }
 
@@ -343,13 +264,36 @@ function main() {
             });
         });
     });
-    p6.then(function(val) {
+    var p7 = p6.then(function(val) {
         return new Promise(function(resolve, reject) {
-            listBuckets(s3, s3Bucket);
-            listObjects(s3, s3Bucket, '');
-            resolve(true);
+            listBuckets(s3, s3Bucket, function(err) {
+                if (window.console) { console.log('[main] listBuckets called'); }
+                if (!err) {
+
+                    resolve(true);
+                }
+            });
         });
     });
+    p7.then(function(val) {
+        return new Promise(function(resolve, reject) {
+            listObjects(s3, s3Bucket, '', '', function(err) {
+                if (window.console) { console.log('[main] listObjects called'); }
+                if (!err) {
+                    resolve(true);
+                }
+            });
+        });
+    });
+
+}
+
+function aws_prefix_search() {
+    var search_query = $('#buckets-search-query').val();
+    var tags = state.prefix.split('/');
+    tags.pop();
+    var search_prefix = listObjects(s3, state.s3Bucket, tags.join('/') + '/' + search_query);
+    window.history.pushState(state, state.prefix+':'+state.marker);
 }
 
 function setup() {
@@ -385,7 +329,8 @@ function setup() {
             if (window.console) { console.log('[chrome.storage] set first_run'); }
         });
         main();
-        return true;
+        $('#credentialModal').modal('hide');
+        return false;
     });
     $('#btnUpload').click(function() {
         var fileChooser = $('#file-chooser')[0];
@@ -405,24 +350,22 @@ function setup() {
             };
             if (window.console) { console.log('Started upload'); }
             s3.upload(params, function(err, data) {
-                if (window.console) { console.log(err ? 'ERROR!' : 'UPLOADED.'); }
-                if (window.console) { console.log('Finished upload' + data); }
+                if (window.console) { console.log(err ? 'ERROR!' : 'UPLOADED!'); }
+                if (!err) {
+                    $('#uploadModal').modal('hide');
+                    listObjects(s3, state.s3Bucket, state.prefix, state.marker);
+                    if (window.console) { console.log('Finished upload' + data); }
+                }
             });
-            return true;
         } else {
             if (window.console) { console.log('nothing to upload'); }
         }
     });
-    function aws_prefix_search() {
-        var search_query = $('#buckets-search-query').val();
-        var tags = state.prefix.split('/');
-        tags.pop();
-        var search_prefix = listObjects(s3, state.s3Bucket, tags.join('/') + '/' + search_query);
-        window.history.pushState(state, state.prefix+':'+state.marker);
-    }
+
     $('#buckets-search').click(function() {
         aws_prefix_search();
     });
+
     $('#buckets-search-query').keydown(function(e) {
         var keypressed = event.keyCode || event.which;
         // Enter is pressed
@@ -430,7 +373,43 @@ function setup() {
     });
 }
 
+
 document.addEventListener('DOMContentLoaded', function () {
+//$( document ).ready(function() {
+
+    if (window.console) { console.log('[main]', 'init handlebar render'); }
+    var sandbox = document.getElementById('sandbox');
+    renderer = sandbox.contentWindow;
+
+    var templates = $('script[id$=-template]');
+    sandbox.addEventListener('load', function() {
+    //$(sandbox).ready(function() {
+        if (window.console) { console.log('[main]', 'compile all templates'); }
+        $.each(templates, function(i, elem) {
+            var message = { command: 'new', name: elem.id.replace('-template', ''), source: elem.innerHTML };
+            renderer.postMessage(message, '*');
+        });
+    });
+
+    if (window.console) { console.log('[main]', 'Added render message listner'); }
+    window.addEventListener('message', function(event) {
+        if (event.data.command == 'render') {
+            if (event.data.html) {
+                $('#'+event.data.name).html(event.data.html);
+                $('a.s3-folder').click(function () {
+                    // window.location.hash = state.prefix+':'+state.marker;
+                    prefix = $(this).attr('data-prefix');
+                    var marker = $(this).attr('data-marker');
+                    listObjects(s3, state.s3Bucket, prefix, marker);
+                    window.history.pushState(state, state.prefix+':'+state.marker);
+                });
+            }
+        } else {
+            if (window.console) { console.log('[message]', 'name:', event.data.name); }
+        }
+    });
+
+
     setup();
     var p1 = new Promise(function(resolve, reject) {
         chrome.storage.local.get('first_run', function(result) {
@@ -456,4 +435,4 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 });
-
+//});

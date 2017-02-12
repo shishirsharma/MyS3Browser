@@ -17,8 +17,16 @@
         <!-- build:css styles/main.css -->
         <link href="styles/main.css" rel="stylesheet">
         <!-- endbuild -->
+        <!-- build:js scripts/pace-index.js -->
+        <script src="bower_components/PACE/pace.js"></script>
+        <!-- endbuild -->
+        <!-- build:css styles/pace-minimal.css -->
+        <link href="bower_components/PACE/themes/pink/pace-theme-minimal.css" rel="stylesheet">
+        <!-- endbuild -->
+
     </head>
     <body>
+        <iframe id="sandbox" class="hidden-xl-down" src="sandbox.html"></iframe>
         <header class="navbar navbar-light navbar-toggleable-md">
             <div class="collapse navbar-collapse">
                 <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,9 +50,7 @@
             </div>
         </header>
         <div class="container-fluid">
-            <div>
-                <ol id="prefix-breadcrumb" class="breadcrumb">
-                </ol>
+            <div id="top-breadcrumb">
             </div>
             <div class="well">
                 <ul class="navbar-nav mr-auto bucket-tools">
@@ -64,7 +70,7 @@
                         </div><!-- /input-group -->
                     </li>
                 </ul>
-                <table id="fileTable" class="table">
+                <table id="main-table" class="table">
                 </table>
             </div>
         </div>
@@ -173,7 +179,61 @@
             </div>
         </div>
 
-        <iframe id="theFrame" class="hidden-xl-down" src="sandbox.html"></iframe>
+        <!-- Handlebars Templates -->
+
+        <script id="top-breadcrumb-template" type="text/x-handlebars-template">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a class="s3-folder" data-prefix="" href="#">{{root}}</a></li>
+                {{#each crumbs}}
+                <li class="breadcrumb-item"><a class="s3-folder" data-prefix="{{prefix}}" href="#">{{name}}</a></li>
+                {{/each}}
+                {{#if active}}
+                <li class="breadcrumb-item active">{{active}}</li>
+                {{/if}}
+            </ol>
+        </script>
+
+        <script id="main-table-template" type="text/x-handlebars-template">
+            <table id="fileTable" class="table">
+                <thead>
+                    <tr>
+                        <th>Key</th>
+                        <th>Last Updated</th>
+                        <th>Size</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each folders}}
+                    <tr>
+                        <td><span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> <a class="s3-folder" data-prefix="{{prefix}}" href="#"><strong>{{name}}</strong></a></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {{/each}}
+                    {{#each files}}
+                    <tr>
+                        <td><a class="link-icon" filename="{{filename}}" href="{{url}}">{{filename}}</a></td>
+                        <td>{{lastmodified}}</td>
+                        <td>{{size}}</td>
+                    </tr>
+                    {{/each}}
+                    {{#if isTruncated}}
+                    <tr>
+                        <td><span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span><a class="s3-folder" data-prefix="{{prefix}}" data-marker="{{marker}}" href="#"><strong>next</strong></a></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {{/if}}
+                </tbody>
+            </table>
+        </script>
+
+        <script id="hello-world-template" type="text/x-handlebars-template">
+            <div class="entry">
+                <h1>Hello, {{thing}}!</h1>
+            </div>
+        </script>
+        <!-- endTemplates -->
 
 
         <!-- Latest compiled and minified JavaScript -->
@@ -184,7 +244,6 @@
         <script src="bower_components/tether/dist/js/tether.js"></script>
         <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
         <script src="bower_components/handlebars/handlebars.js"></script>
-        <script src="bower_components/PACE/pace.js"></script>
         <script src="bower_components/select2/dist/js/select2.js"></script>
         <script src="bower_components/aws-sdk/dist/aws-sdk.js"></script>
         <!-- endbower -->

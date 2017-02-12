@@ -12,7 +12,6 @@
     </head>
     <body>
 
-
         <!-- build:js scripts/sandbox-vendor.js -->
         <!-- bower:js -->
         <script src="bower_components/jquery/dist/jquery.js"></script>
@@ -25,36 +24,10 @@
         <!-- endbower -->
         <!-- endbuild -->
 
-        <script id="hello-world-template" type="text/x-handlebars-template">
-            <div class="entry">
-                <h1>Hello, {{thing}}!</h1>
-            </div>
-        </script>
+        <!-- build:js scripts/sandbox.js -->
+        <script type="text/javascript" src="scripts/sandbox.js"></script>
+        <!-- endbuild -->
 
-        <script>
-         var templates = [];
-         var source = document.getElementById('hello-world-template').innerHTML;
-         templates['hello'] = Handlebars.compile(source);
-
-         // Set up message event handler:
-         window.addEventListener('message', function(event) {
-             var command = event.data.command;
-             var name = event.data.name || 'hello';
-             switch(command) {
-                 case 'render':
-                     event.source.postMessage({
-                         name: name,
-                         html: templates[name](event.data.context)
-                     }, event.origin);
-                     break;
-                     // You could imagine additional functionality. For instance:
-                     //
-                     // case 'new':
-                     //   templates[event.data.name] = Handlebars.compile(event.data.source);
-                     //   event.source.postMessage({name: name, success: true}, event.origin);
-                     //   break;
-             }
-         });
-        </script>
+        <!-- <script type="text/javascript"> </script> -->
     </body>
 </html>
