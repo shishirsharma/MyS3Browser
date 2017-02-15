@@ -136,7 +136,7 @@ function listObjects(s3, s3_bucket, s3_prefix, s3_marker='', callback) {
             var files_context = files.Contents.map(function(obj) {
                 var map = {};
                 map['filename'] = decodeURIComponent(search_prefix+obj.Key.replace('+', ' ').replace(prefix, ''));
-                map['href'] = s3.getSignedUrl('getObject', {Bucket: s3Bucket, Key: decodeURIComponent(obj.Key.replace('+', ' '))});
+                map['url'] = s3.getSignedUrl('getObject', {Bucket: s3Bucket, Key: decodeURIComponent(obj.Key.replace('+', ' '))});
                 map['prefix'] = obj.Prefix;
                 map['LastModified'] = obj.LastModified;
                 map['size'] = humanFileSize(obj.Size, true);
@@ -160,7 +160,7 @@ function listObjects(s3, s3_bucket, s3_prefix, s3_marker='', callback) {
             if (tags.length > 1) {
                 tags.forEach(function(currentValue, index, array) {
                     crumbs.push({
-                        prefix: decodeURIComponent('s3://' + s3Bucket) + '/' + array.slice(0,index+1).join('/')+'/',
+                        prefix: array.slice(0,index+1).join('/')+'/',
                         name: currentValue
                     });
                 });
