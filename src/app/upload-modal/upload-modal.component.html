@@ -1,0 +1,30 @@
+<ng-template #uploadModal let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h5 class="modal-title" id="uploadModalLabel">Upload</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+
+  </div>
+  <div class="modal-body">
+    <form class="form-horizontal">
+      <div class="form-group">
+        <input type="text" class="form-control" id="aws-key" placeholder="File Name">
+      </div>
+      <div class="form-group">
+        <label class="custom-file">
+          <input type="file" id="file-chooser" class="custom-file-input">
+          <span class="custom-file-control"></span>
+        </label>
+      </div>
+    </form>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      <button id="btnUpload" type="button" class="btn btn-primary">Upload</button>
+    </div>
+  </div>
+</ng-template>
+
+
+<button type="button" class="btn btn-primary btn-upload mr-2" (click)="open(uploadModal)">
+  <i class="fa fa-upload" aria-hidden="true"></i>
+</button>

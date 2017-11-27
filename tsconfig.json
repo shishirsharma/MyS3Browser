@@ -12,6 +12,7 @@
       "node_modules/@types"
     ],
     "lib": [
+      "es2015.promise",
       "es2017",
       "dom"
     ]

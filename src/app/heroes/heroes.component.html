@@ -1,0 +1,15 @@
+<ul class="heroes">
+  <div class="row" *ngFor="let hero of heroes">
+    <div class="col mb-1">
+      <a routerLink="/detail/{{hero.id}}">
+      <button type="button" class="btn">
+        <span class="badge badge-light">{{hero.id}}</span> {{hero.name}}
+      </button>
+      </a>
+      <button class="button link" title="delete hero" (click)="delete(hero)">x</button>
+      <!-- each hero goes here -->
+    </div>
+  </div>
+</ul>
+
+<app-hero-detail [hero]="selectedHero"></app-hero-detail>
