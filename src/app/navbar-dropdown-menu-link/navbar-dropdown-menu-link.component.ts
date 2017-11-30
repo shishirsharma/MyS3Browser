@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 
 import { CredentialService } from '../credential.service';
 import { MessageService } from '../message.service';
-import { AwsS3Service} from '../aws-s3.service';
+import { AwsS3Service } from '../aws-s3.service';
 
 @Component({
   selector: 'app-navbar-dropdown-menu-link',
@@ -10,7 +10,9 @@ import { AwsS3Service} from '../aws-s3.service';
   styleUrls: ['./navbar-dropdown-menu-link.component.css']
 })
 export class NavbarDropdownMenuLinkComponent implements OnInit {
-  public buckets
+  public buckets = [];
+
+  @Input()  currentBucket: string;
 
   constructor(
     private awsS3Service: AwsS3Service,

@@ -7,7 +7,7 @@
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav ml-auto">
       <li class="nav-item dropdown ">
-        <app-navbar-dropdown-menu-link></app-navbar-dropdown-menu-link>
+        <app-navbar-dropdown-menu-link [currentBucket]="s3Bucket" ></app-navbar-dropdown-menu-link>
       </li>
     </ul>
     <form class="form-inline my-2 my-lg-0">
@@ -21,9 +21,8 @@
 <div class="container-fluid">
   <nav id="top-breadcrumb" aria-label="breadcrumb" role="navigation">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a class="s3-folder" data-prefix="" href="#">s3://pingpad.net</a></li>
-      <li class="breadcrumb-item"><a href="#">Library</a></li>
-      <li class="breadcrumb-item active" aria-current="page">Data</li>
+      <li class="breadcrumb-item"><a class="s3-folder" data-prefix="" href="#">s3://{{s3Bucket}}</a></li>
+      <li class="breadcrumb-item" *ngFor="let folder of s3Prefix.slice(0, -1).split('/'); index as i; last as isLast" [ngClass]="{'active': isLast}"><a [routerLink]="['/index.html']" [queryParams]="{ bucket: s3Bucket, prefix: s3Prefix.split('/').splice(0, i+1).join('/')+'/', marker: s3Marker }" *ngIf="!isLast">{{folder}}</a><span *ngIf="isLast">{{folder}}</span></li>
     </ol>
   </nav>
   <div class="card">
@@ -48,10 +47,16 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td><a class="link-icon" filename="" href="https://s3-us-west-1.amazonaws.com/pingpad.net/logs/?AWSAccessKeyId=AKIAICWTBU644RPEIL3Q&amp;Expires=1511440384&amp;Signature=KvuLiyo9QoF147NEsMM%2FW06lJaY%3D"></a></td>
+          <tr *ngFor="let file of files.CommonPrefixes">
+            <td><span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> <a class="s3-folder" [attr.data-prefix]="file.Prefix" [routerLink]="['/index.html']" [queryParams]="{ bucket: s3Bucket, prefix: file.Prefix, marker: s3Marker }"><strong>{{file.Prefix.replace('+', ' ').replace(s3Prefix, '')}}</strong></a></td>
             <td></td>
-            <td>0 B</td>
+            <td></td>
+          </tr>
+
+          <tr *ngFor="let file of files.Contents" >
+            <td><a class="link-icon" [attr.data-filename]="file.Key" href="#" >{{file.Key.replace('+', ' ').replace(s3Prefix, '')}}</a></td>
+            <td>{{file.LastModified}}</td>
+            <td>{{file.Size}}</td>
           </tr>
         </tbody>
       </table>

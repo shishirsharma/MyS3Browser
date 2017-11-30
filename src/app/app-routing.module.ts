@@ -8,8 +8,8 @@ import { DashboardComponent }      from './dashboard/dashboard.component';
 import { HeroDetailComponent }  from './hero-detail/hero-detail.component';
 
 const routes: Routes = [
-  { path: '', component: DashboardComponent },
-  { path: 'dashboard', redirectTo: '',  pathMatch: 'full'},
+  { path: 'index.html', component: DashboardComponent },
+  { path: '', redirectTo: 'index.html',  pathMatch: 'full'},
   { path: 'detail/:id', component: HeroDetailComponent },
   { path: 'heroes', component: HeroesComponent }
 ];

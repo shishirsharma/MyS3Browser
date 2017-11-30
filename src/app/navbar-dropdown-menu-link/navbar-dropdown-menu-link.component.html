@@ -1,8 +1,8 @@
 <li class="nav-item" ngbDropdown>
   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" ngbDropdownToggle>
-    Dropdown link
+    {{currentBucket}}
   </a>
   <div calass="dropdown-menu" ngbDropdownMenu>
-    <a class="dropdown-item" *ngFor="let bucket of buckets" href="#" name="{{bucket.Name}}" >{{bucket.Name}}</a>
+    <a class="dropdown-item" *ngFor="let bucket of buckets" [ngClass]="{'disabled': bucket.Name === currentBucket}" [routerLink]="['/index.html']" [queryParams]="{ bucket: bucket.Name }" >{{bucket.Name}}</a>
   </div>
 </li>
