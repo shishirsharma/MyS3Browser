@@ -13,20 +13,16 @@ import * as AWS from 'aws-sdk';
 @Injectable()
 export class AwsS3Service {
   public s3
-  public s3Bucket
-  public s3Prefix
-  public s3Marker
 
   constructor(
     private credentialService: CredentialService,
     private messageService: MessageService
   ) {
     let credential = this.credentialService.getCredential();
-    this.s3Bucket = credential.s3_bucket;
     this.s3 = new AWS.S3();
   }
 
-  listObjects(callback) {
+  listObjects(s3Bucket, s3Prefix, s3Marker, callback) {
     // var prefix = s3_prefix;
     // var s3Bucket = s3_bucket;
     // if(s3_bucket == '') {
@@ -35,10 +31,10 @@ export class AwsS3Service {
     // var search_prefix = '';
     // var marker = s3_marker;
     let params = {
-      Bucket: this.s3Bucket,
+      Bucket: s3Bucket,
       Delimiter: '/',
-      Prefix: decodeURIComponent(this.s3Prefix),
-      Marker: this.s3Marker,
+      Prefix: decodeURIComponent(s3Prefix),
+      Marker: s3Marker,
       EncodingType: 'url',
       MaxKeys: 30
     };
@@ -57,9 +53,9 @@ export class AwsS3Service {
           callback(err=true);
         }
       } else {
-        //     // successful response
-        //     if (window.console) { console.log('[function.listObjects]', 'Folders:', files.CommonPrefixes.length, 'Files:', files.Contents.length); }
-
+            // successful response
+            if (window.console) { console.log('[function.listObjects]', 'Folders:', files.CommonPrefixes.length, 'Files:', files.Contents.length); }
+        callback(false, files);
 
         //     var folders_context = files.CommonPrefixes.map(function(obj) {
         //       var map = {};
