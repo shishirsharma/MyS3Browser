@@ -18,10 +18,7 @@ export class CredentialService {
     private messageService: MessageService
   ) {
     let c = this.getCredential()
-    AWS.config.update({
-      credentials: new AWS.Credentials(c.access_key_id, c.secret_access_key)
-    });
-    AWS.config.region = c.s3_region;
+    this.updateAwsCredential(c);
   }
 
   /** Log a HeroService message with the MessageService */
@@ -38,9 +35,17 @@ export class CredentialService {
     }
   }
 
+  updateAwsCredential(c) {
+    AWS.config.update({
+      credentials: new AWS.Credentials(c.access_key_id, c.secret_access_key)
+    });
+    AWS.config.region = c.s3_region;
+  }
+
   setCredential (credential) {
     let c = JSON.stringify(credential);
     console.log(c);
+    this.updateAwsCredential(c)
     window.localStorage.setItem('credential', c);
   }
 }

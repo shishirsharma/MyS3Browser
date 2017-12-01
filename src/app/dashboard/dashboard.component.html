@@ -11,10 +11,8 @@
       </li>
     </ul>
     <form class="form-inline my-2 my-lg-0">
-      <form class="form-inline my-2 my-lg-0">
-        <app-credential-modal></app-credential-modal>
-        <app-help-modal></app-help-modal>
-      </form>
+      <app-credential-modal [openModal]="aws_error" (credentialUpdate)="onCredentialUpdate($event)" ></app-credential-modal>
+      <app-help-modal></app-help-modal>
     </form>
   </div>
 </nav>
@@ -53,13 +51,28 @@
             <td></td>
           </tr>
 
-          <tr *ngFor="let file of files.Contents" >
+          <tr *ngFor="let file of files.Contents">
             <td><a class="link-icon" [attr.data-filename]="file.Key" href="#" >{{file.Key.replace('+', ' ').replace(s3Prefix, '')}}</a></td>
             <td>{{file.LastModified}}</td>
             <td>{{file.Size}}</td>
           </tr>
         </tbody>
       </table>
+    </div>
+    <div class="card-footer">
+      <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-end">
+          <li class="page-item">
+            <a class="page-link" (click)="goBack()" href="#" tabindex="-1">Previous</a>
+          </li>
+          <!-- <li class="page-item"><a class="page-link" href="#">1</a></li>
+               <li class="page-item"><a class="page-link" href="#">2</a></li>
+               <li class="page-item"><a class="page-link" href="#">3</a></li> -->
+          <li class="page-item" *ngIf="files.NextMarker" >
+            <a class="page-link" [routerLink]="['/index.html']" [queryParams]="{ bucket: s3Bucket, prefix: s3Prefix, marker: files.NextMarker }">Next</a>
+          </li>
+        </ul>
+      </nav>
     </div>
   </div>
 </div>

@@ -36,7 +36,7 @@ export class AwsS3Service {
       Prefix: decodeURIComponent(s3Prefix),
       Marker: s3Marker,
       EncodingType: 'url',
-      MaxKeys: 30
+      MaxKeys: 100
     };
     // if (window.console) { console.log('[function.listObjects]', 's3://' + s3Bucket +  '.' + s3.endpoint.hostname + '/' + prefix + '#' + marker ); }
     // state = {s3Bucket: s3Bucket, prefix: prefix, marker: marker };

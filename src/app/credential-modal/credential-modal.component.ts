@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild, TemplateRef } from '@angular/core'
 
 import {NgbModal, ModalDismissReasons, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 
@@ -12,8 +12,14 @@ import { CredentialService } from '../credential.service';
   styleUrls: ['./credential-modal.component.css']
 })
 export class CredentialModalComponent implements OnInit {
+  @ViewChild('credentialModal') private content: TemplateRef<any>;
+
   closeResult: string;
+
   modalRef: NgbModalRef;
+
+  @Input() openModal: boolean;
+  @Output() credentialUpdate: EventEmitter<any> = new EventEmitter();
 
   constructor(
     private modalService: NgbModal,
@@ -24,10 +30,13 @@ export class CredentialModalComponent implements OnInit {
   submitted = false;
 
   ngOnInit() {
+    if(this.openModal) {
+      this.open();
+    }
   }
 
-  open(content) {
-    this.modalRef = this.modalService.open(content);
+  open() {
+    this.modalRef = this.modalService.open(this.content);
     this.modalRef.result.then((result) => {
       this.closeResult = `Closed with: ${result}`;
     }, (reason) => {
@@ -39,6 +48,7 @@ export class CredentialModalComponent implements OnInit {
     this.submitted = true;
     this.credentialService.setCredential(this.model);
     this.modalRef.close();
+    this.credentialUpdate.emit(null);
   }
 
 
