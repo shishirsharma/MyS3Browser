@@ -12,17 +12,16 @@ import * as AWS from 'aws-sdk';
 
 @Injectable()
 export class AwsS3Service {
-  public s3
 
   constructor(
     private credentialService: CredentialService,
     private messageService: MessageService
   ) {
     let credential = this.credentialService.getCredential();
-    this.s3 = new AWS.S3();
   }
 
-  listObjects(s3Bucket, s3Prefix, s3Marker, callback) {
+
+  listObjects(s3, s3Bucket, s3Prefix, s3Marker, callback) {
     // var prefix = s3_prefix;
     // var s3Bucket = s3_bucket;
     // if(s3_bucket == '') {
@@ -34,7 +33,7 @@ export class AwsS3Service {
       Bucket: s3Bucket,
       Delimiter: '/',
       Prefix: decodeURIComponent(s3Prefix),
-      Marker: s3Marker,
+      //ContinuationToken: s3Marker,
       EncodingType: 'url',
       MaxKeys: 100
     };
@@ -43,18 +42,18 @@ export class AwsS3Service {
     // var tags = prefix.trim().split('/');
     // search_prefix = tags.pop(); // Remove empty element due to last slash
 
-    this.s3.listObjects(params, function(err, files) {
+    s3.listObjectsV2(params, function(err, files) {
       if (err) {
         // an error occurred
-        if (window.console) { console.log(err, err.stack); }
+        if (window.console) { console.log(err.name, err.stack); }
         // Make sure the callback is a function
         if (typeof callback === 'function') {
           // Call it, since we have confirmed it is callable
-          callback(err=true);
+          callback(err);
         }
       } else {
-            // successful response
-            if (window.console) { console.log('[function.listObjects]', 'Folders:', files.CommonPrefixes.length, 'Files:', files.Contents.length); }
+        // successful response
+        if (window.console) { console.log('[function.listObjects]', 'Folders:', files.CommonPrefixes.length, 'Files:', files.Contents.length); }
         callback(false, files);
 
         //     var folders_context = files.CommonPrefixes.map(function(obj) {
@@ -115,17 +114,18 @@ export class AwsS3Service {
 
       }
     });
+
   }
 
-  listBuckets(callback) {
+  listBuckets(s3, callback) {
     if (window.console) { console.log('[function.listBuckets]', 'starting'); }
-    this.s3.listBuckets(function(err, buckets) {
+    s3.listBuckets(function(err, buckets) {
       if (err) {
         if (window.console) { console.log(err, err.stack); } // an error occurred
         // Make sure the callback is a function
         if (typeof callback === 'function') {
           // Call it, since we have confirmed it is callable
-          callback(err=true);
+          callback(err);
         }
 
       } else {

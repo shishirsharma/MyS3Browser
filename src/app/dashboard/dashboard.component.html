@@ -69,7 +69,7 @@
                <li class="page-item"><a class="page-link" href="#">2</a></li>
                <li class="page-item"><a class="page-link" href="#">3</a></li> -->
           <li class="page-item" *ngIf="files.NextMarker" >
-            <a class="page-link" [routerLink]="['/index.html']" [queryParams]="{ bucket: s3Bucket, prefix: s3Prefix, marker: files.NextMarker }">Next</a>
+            <a class="page-link" [routerLink]="['/index.html']" [queryParams]="{ bucket: s3Bucket, prefix: s3Prefix, marker: files.NextContinuationToken }">Next</a>
           </li>
         </ul>
       </nav>
