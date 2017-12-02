@@ -42,7 +42,7 @@ export class AwsS3Service {
     // var tags = prefix.trim().split('/');
     // search_prefix = tags.pop(); // Remove empty element due to last slash
 
-    s3.listObjectsV2(params, function(err, files) {
+    s3.listObjects(params, function(err, files) {
       if (err) {
         // an error occurred
         if (window.console) { console.log(err.name, err.stack); }

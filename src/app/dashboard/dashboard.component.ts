@@ -51,42 +51,26 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log("dashboard.component#ngOnInit")
+    // console.log("dashboard.component#ngOnInit")
     this.getHeroes();
-    //this.s3Prefix = this.route.snapshot.paramMap.get('prefix');
+
+    let that = this;
     this.sub = Observable
-      .combineLatest(this.route.queryParams, this.credentialService.s3)
+      .combineLatest(this.route.queryParams, this.credentialService.s3, (params, s3) => ({params, s3}))
       .subscribe(values => {
-        console.log('dashboard.component#ngOnInit', values);
-        let [params, s3] = values;
+        console.log('dashboard.component#ngOnInit: Observable', values);
+        let [params, s3] = [values.params, values.s3];
 
         // Defaults to 0 if no query param provided.
         //let credential = this.credentialService.getCredential();
 
-        this.s3Bucket = params['bucket'] || 'Select Bucket';
-        this.s3Prefix = params['prefix'] || '/';
-        this.s3Marker = params['marker'] || null;
+        that.s3Bucket = params['bucket'] ||'Select Bucket';
+        that.s3Prefix = params['prefix'] || '';
+        that.s3Marker = params['marker'] || null;
 
-        // s3.s3_bucket = this.s3Bucket;
-        this.dashboardRenderData(s3);
+        //s3.s3_bucket = this.s3Bucket;
+        that.dashboardRenderData(s3);
       });
-
-    // this.credentialService.s3.subscribe(s3 => {
-    // });
-
-    // this.sub = this.route
-    //   .queryParams
-    //   .subscribe(params => {
-    //     // Defaults to 0 if no query param provided.
-    //     let credential = this.credentialService.getCredential();
-
-    //     this.s3Bucket = params['bucket'] || credential.s3_bucket || 'Select Bucket';
-    //     this.s3Prefix = params['prefix'] || '';
-    //     this.s3Marker = params['marker'] || null;
-
-    //     credential.s3_bucket = this.s3Bucket;
-    //     this.dashboardRenderData();
-    //   });
   }
 
   ngAfterViewInit() {
@@ -109,7 +93,7 @@ export class DashboardComponent implements OnInit {
     //let credential = this.credentialService.getCredential();
 
     console.log('dashboard.component#dashboardRenderData');
-    if(credential.s3_bucket !== '') {
+    if(this.s3Bucket === 'Select Bucket') {
       this.s3Bucket = credential.s3_bucket;
     }
     AWS.config.update({

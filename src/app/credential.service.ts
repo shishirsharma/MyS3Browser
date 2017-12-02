@@ -14,15 +14,20 @@ import { MessageService } from './message.service';
 
 @Injectable()
 export class CredentialService {
-  private _s3:Subject<any> = new Subject<any>();
-
-  public readonly s3: Observable<any> = this._s3.asObservable();
+  // private _s3:Subject<any> = new Subject<any>();
+  // private _s3 = new BehaviorSubject<any>({});
+  private _s3;
+  // public readonly s3: Observable<any> = this._s3.asObservable();
+  // public readonly s3 = this._s3.asObservable();
+  public readonly s3;
 
   constructor(
 //    private storage: localStorage,
     private messageService: MessageService
   ) {
     let c = this.getCredential()
+    this._s3 = new BehaviorSubject<any>(c);
+    this.s3 = this._s3.asObservable();
     this.updateAwsCredential(c);
   }
 
@@ -50,9 +55,9 @@ export class CredentialService {
   }
 
   setCredential(credential) {
+    this.updateAwsCredential(credential)
     let c = JSON.stringify(credential);
     console.log(c);
-    this.updateAwsCredential(c)
     window.localStorage.setItem('credential', c);
   }
 }
