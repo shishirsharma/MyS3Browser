@@ -140,6 +140,26 @@ a.link-icon:before, a.link-icon.link-file[href]:before {
   text-align: right;
   margin-right: 10px;
 }
+
+a[filename$=".exe"].link-icon:before,
+a[filename$=".jar"].link-icon:before,
+a[filename$=".dll"].link-icon:before,
+a[filename$=".bat"].link-icon:before,
+a[filename$=".pl"].link-icon:before,
+a[filename$=".scr"].link-icon:before,
+a[filename$=".msi"].link-icon:before,
+a[filename$=".app"].link-icon:before,
+a[filename$=".deb"].link-icon:before,
+a[filename$=".apk"].link-icon:before,
+a[filename$=".jar"].link-icon:before,
+a[filename$=".vb"].link-icon:before,
+a[filename$=".prg"].link-icon:before,
+a[filename$=".sh"].link-icon:before,
+a.link-icon.link-exe[href]:before {
+  content: "\f085"; /*Executable*/
+}
+
+
 a[filename$=".txt"].link-icon:before, a[filename$=".log"].link-icon:before, a.link-icon.link-text[href]:before {
   content: "\f0f6"; /*Text*/
 }
@@ -240,47 +260,4 @@ a[filename$=".ini"].link-icon:before,
 a[filename$=".config"].link-icon:before,
 a.link-icon.link-code[href]:before {
   content: "\f1c9"; /*code*/
-}
-a[filename$=".exe"].link-icon:before,
-a[filename$=".jar"].link-icon:before,
-a[filename$=".dll"].link-icon:before,
-a[filename$=".bat"].link-icon:before,
-a[filename$=".pl"].link-icon:before,
-a[filename$=".scr"].link-icon:before,
-a[filename$=".msi"].link-icon:before,
-a[filename$=".app"].link-icon:before,
-a[filename$=".deb"].link-icon:before,
-a[filename$=".apk"].link-icon:before,
-a[filename$=".jar"].link-icon:before,
-a[filename$=".vb"].link-icon:before,
-a[filename$=".prg"].link-icon:before,
-a[filename$=".sh"].link-icon:before,
-a.link-icon.link-exe[href]:before {
-  content: "\f085"; /*Executable*/
-}
-
-a[filename$=".com"].link-icon:before,
-a[filename$=".net"].link-icon:before,
-a[filename$=".org"].link-icon:before,
-a[filename$=".edu"].link-icon:before,
-a[filename$=".gov"].link-icon:before,
-a[filename$=".mil"].link-icon:before,
-a[filename$="/"].link-icon:before,
-a[filename$=".html"].link-icon:before,
-a[filename$=".htm"].link-icon:before,
-a[filename$=".xhtml"].link-icon:before,
-a[filename$=".jhtml"].link-icon:before,
-a[filename$=".php"].link-icon:before,
-a[filename$=".php3"].link-icon:before,
-a[filename$=".php4"].link-icon:before,
-a[filename$=".php5"].link-icon:before,
-a[filename$=".phtml"].link-icon:before,
-a[filename$=".asp"].link-icon:before,
-a[filename$=".aspx"].link-icon:before,
-a[filename$=".cfm"].link-icon:before,
-a[filename*="?"].link-icon:before,
-a[filename*="#"].link-icon:before,
-a.link-icon:not([href*='.']):before,
-a.link-icon.link[href]:before {
-  content: "\f0c1"; /*link*/
 }

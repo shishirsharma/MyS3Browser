@@ -9,6 +9,21 @@ import { catchError, map, tap } from 'rxjs/operators';
 
 import * as AWS from 'aws-sdk';
 
+function humanFileSize(bytes, si) {
+    var thresh = si ? 1000 : 1024;
+    if(Math.abs(bytes) < thresh) {
+        return bytes + ' B';
+    }
+    var units = si
+        ? ['KB','MB','GB','TB','PB','EB','ZB','YB']
+        : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+    var u = -1;
+    do {
+        bytes /= thresh;
+        ++u;
+    } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+    return bytes.toFixed(1)+' '+units[u];
+}
 
 @Injectable()
 export class AwsS3Service {
@@ -33,16 +48,20 @@ export class AwsS3Service {
       Bucket: s3Bucket,
       Delimiter: '/',
       Prefix: decodeURIComponent(s3Prefix),
-      //ContinuationToken: s3Marker,
       EncodingType: 'url',
       MaxKeys: 100
     };
+    if(s3Marker !== 'null') {
+      params['ContinuationToken']= s3Marker;
+    }
+
+
     // if (window.console) { console.log('[function.listObjects]', 's3://' + s3Bucket +  '.' + s3.endpoint.hostname + '/' + prefix + '#' + marker ); }
     // state = {s3Bucket: s3Bucket, prefix: prefix, marker: marker };
     // var tags = prefix.trim().split('/');
     // search_prefix = tags.pop(); // Remove empty element due to last slash
 
-    s3.listObjects(params, function(err, files) {
+    s3.listObjectsV2(params, function(err, files) {
       if (err) {
         // an error occurred
         if (window.console) { console.log(err.name, err.stack); }
@@ -54,6 +73,16 @@ export class AwsS3Service {
       } else {
         // successful response
         if (window.console) { console.log('[function.listObjects]', 'Folders:', files.CommonPrefixes.length, 'Files:', files.Contents.length); }
+        files.CommonPrefixes = files.CommonPrefixes.map((item) => {
+          item.HumanPrefix = item.Prefix.replace('+', ' ').replace(s3Prefix, '')
+          return item;
+        });
+        files.Contents = files.Contents.map((item) => {
+          item.HumanKey = item.Key.replace('+', ' ').replace(s3Prefix, '')
+          item.HumanSize = humanFileSize(item.Size, true);
+          item.DownloadUrl = s3.getSignedUrl('getObject', {Bucket: s3Bucket, Key: decodeURIComponent(item.Key.replace('+', ' '))});
+          return item;
+        });
         callback(false, files);
 
         //     var folders_context = files.CommonPrefixes.map(function(obj) {

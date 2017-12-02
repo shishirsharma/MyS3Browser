@@ -36,7 +36,7 @@
       </nav>
     </div>
     <div class="card-body">
-      <table id="main-table" class="table">
+      <table id="fileTable" class="table">
         <thead>
           <tr>
             <th>Key</th>
@@ -46,15 +46,15 @@
         </thead>
         <tbody>
           <tr *ngFor="let file of files.CommonPrefixes">
-            <td><span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> <a class="s3-folder" [attr.data-prefix]="file.Prefix" [routerLink]="['/index.html']" [queryParams]="{ bucket: s3Bucket, prefix: file.Prefix, marker: s3Marker }"><strong>{{file.Prefix.replace('+', ' ').replace(s3Prefix, '')}}</strong></a></td>
+            <td><span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> <a class="s3-folder" [attr.data-prefix]="file.Prefix" [routerLink]="['/index.html']" [queryParams]="{ bucket: s3Bucket, prefix: file.Prefix, marker: s3Marker }"><strong>{{ file.HumanPrefix }}</strong></a></td>
             <td></td>
             <td></td>
           </tr>
 
           <tr *ngFor="let file of files.Contents">
-            <td><a class="link-icon" [attr.data-filename]="file.Key" href="#" >{{file.Key.replace('+', ' ').replace(s3Prefix, '')}}</a></td>
+            <td><a class="link-icon" [attr.filename]="file.Key" [href]="file.DownloadUrl" >{{file.HumanKey}}</a></td>
             <td>{{file.LastModified}}</td>
-            <td>{{file.Size}}</td>
+            <td>{{file.HumanSize}}</td>
           </tr>
         </tbody>
       </table>
