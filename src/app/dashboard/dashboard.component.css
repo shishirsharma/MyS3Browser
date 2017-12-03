@@ -138,8 +138,14 @@ a.link-icon:before, a.link-icon.link-file[href]:before {
   transform: translate(0, 0);
   width: 20px;
   text-align: right;
-  margin-right: 10px;
+  padding-right: 1rem;
 }
+
+a[filename$="folder"].link-icon:before,
+a.link-icon.link-exe[href]:before {
+  content: "\f07b"; /*Executable*/
+}
+
 
 a[filename$=".exe"].link-icon:before,
 a[filename$=".jar"].link-icon:before,
@@ -160,7 +166,10 @@ a.link-icon.link-exe[href]:before {
 }
 
 
-a[filename$=".txt"].link-icon:before, a[filename$=".log"].link-icon:before, a.link-icon.link-text[href]:before {
+a[filename$=".md"].link-icon:before,
+a[filename$=".txt"].link-icon:before,
+a[filename$=".log"].link-icon:before,
+a.link-icon.link-text[href]:before {
   content: "\f0f6"; /*Text*/
 }
 a[filename$=".pdf"].link-icon:before, a.link-icon.link-pdf[href]:before {
@@ -176,6 +185,7 @@ a[filename$=".ppt"].link-icon:before, a[filename$=".pptx"].link-icon:before, a.l
   content: "\f1c4"; /*Powerpoint*/
 }
 a[filename$=".gif"].link-icon:before,
+a[filename$=".ico"].link-icon:before,
 a[filename$=".jpg"].link-icon:before,
 a[filename$=".jpeg"].link-icon:before,
 a[filename$=".png"].link-icon:before,

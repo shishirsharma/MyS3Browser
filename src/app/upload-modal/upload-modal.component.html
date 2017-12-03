@@ -1,8 +1,7 @@
 <ng-template #uploadModal let-c="close" let-d="dismiss">
   <div class="modal-header">
     <h5 class="modal-title" id="uploadModalLabel">Upload</h5>
-    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')"><span aria-hidden="true">&times;</span></button>
   </div>
   <div class="modal-body">
     <form class="form-horizontal">
@@ -17,10 +16,13 @@
       </div>
     </form>
 
-    <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      <button id="btnUpload" type="button" class="btn btn-primary">Upload</button>
+    <div class="modal-body">
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">Close</button>
+        <button id="btnSaveChange" type="submit" class="btn btn-primary">Upload</button>
+      </div>
     </div>
+
   </div>
 </ng-template>
 
