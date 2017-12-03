@@ -45,8 +45,8 @@ export class DashboardComponent implements OnInit {
     private awsS3Service: AwsS3Service,
     private credentialService: CredentialService,
     private location: Location,
-    private route: ActivatedRoute
-    // private router: Router
+    private route: ActivatedRoute,
+    private router: Router
   ) {
   }
 
@@ -67,7 +67,10 @@ export class DashboardComponent implements OnInit {
         that.s3Bucket = params['bucket'] ||'Select Bucket';
         that.s3Prefix = params['prefix'] || '';
         that.s3Marker = params['marker'] || null;
-
+        that.searchPrefix = params['search'] || null;
+        if(that.searchPrefix) {
+              this.alert = true;
+        }
         //s3.s3_bucket = this.s3Bucket;
         that.dashboardRenderData(s3);
       });
@@ -80,11 +83,33 @@ export class DashboardComponent implements OnInit {
     // child is set
   }
 
+  onSearchKey(event: any){
+    this.onSearch(this.searchPrefix);
+  }
+
+  searchPrefix:string = '';
+  onSearch(query) {
+    this.alert = true;
+    this.router.navigate(['/index.html'], {
+      queryParams: { 'bucket': this.s3Bucket, 'prefix': this.s3Prefix, 'search': this.searchPrefix }
+    });
+  }
+
+  alert:boolean = false;
+  onDismisAlert() {
+    this.alert = false;
+  };
+
   goBack() {
     this.location.back(); // go back to previous location
   }
 
   onCredentialUpdate($event) {
+    let credential = this.credentialService.getCredential();
+    this.dashboardRenderData(credential);
+  }
+
+  onUpdate($event) {
     let credential = this.credentialService.getCredential();
     this.dashboardRenderData(credential);
   }
@@ -101,7 +126,7 @@ export class DashboardComponent implements OnInit {
     });
     AWS.config.region = credential.s3_region;
     let s3 = new AWS.S3();
-    this.awsS3Service.listObjects(s3, this.s3Bucket, this.s3Prefix, this.s3Marker, (error, files) => {
+    this.awsS3Service.listObjects(s3, this.s3Bucket, this.s3Prefix, this.searchPrefix, this.s3Marker, (error, files) => {
       if(error) {
         this.files = {
           'CommonPrefixes': [],

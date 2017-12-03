@@ -36,8 +36,11 @@ export class AwsS3Service {
   }
 
 
-  listObjects(s3, s3Bucket, s3Prefix, s3Marker, callback) {
-    // var prefix = s3_prefix;
+  listObjects(s3, s3Bucket, s3Prefix, s3Search, s3Marker, callback) {
+    var prefix = s3Prefix;
+    if(s3Search) {
+      prefix += s3Search;
+    }
     // var s3Bucket = s3_bucket;
     // if(s3_bucket == '') {
     //   s3Bucket = $('#buckets-select').val();
@@ -47,7 +50,7 @@ export class AwsS3Service {
     let params = {
       Bucket: s3Bucket,
       Delimiter: '/',
-      Prefix: decodeURIComponent(s3Prefix),
+      Prefix: decodeURIComponent(prefix),
       EncodingType: 'url',
       MaxKeys: 100
     };

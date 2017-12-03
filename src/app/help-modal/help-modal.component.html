@@ -1,9 +1,7 @@
 <ng-template #helpModal let-c="close" let-d="dismiss">
   <div class="modal-header">
-    <h5 class="modal-title" id="uploadModalLabel">My S3 Browser</h5>
-    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-      <span aria-hidden="true">&times;</span>
-    </button>
+    <h5 class="modal-title" id="uploadModalLabel">Help</h5>
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')"><span aria-hidden="true">&times;</span></button>
   </div>
   <div class="modal-body">
     <div class="row">
@@ -16,7 +14,7 @@
     </div>
 
     <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      <button type="button" class="btn btn-outline-dark" (click)="c('Close click')">Close</button>
     </div>
   </div>
 </ng-template>

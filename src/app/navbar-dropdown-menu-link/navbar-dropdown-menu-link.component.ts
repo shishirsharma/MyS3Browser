@@ -22,19 +22,19 @@ export class NavbarDropdownMenuLinkComponent implements OnInit {
   ) {
     this.credentialService
       .s3
-    .subscribe(credential => {
-      console.log('navbar-dropdown-menu-link.component#ngOnInit: Observable', credential);
+      .subscribe(credential => {
+        console.log('navbar-dropdown-menu-link.component#ngOnInit: Observable', credential);
 
-      AWS.config.update({
-        credentials: new AWS.Credentials(credential.access_key_id, credential.secret_access_key)
-      });
-      AWS.config.region = credential.s3_region;
-      let s3 = new AWS.S3();
+        AWS.config.update({
+          credentials: new AWS.Credentials(credential.access_key_id, credential.secret_access_key)
+        });
+        AWS.config.region = credential.s3_region;
+        let s3 = new AWS.S3();
 
-      this.awsS3Service.listBuckets(s3, (error, buckets) => {
-        this.buckets  = buckets;
+        this.awsS3Service.listBuckets(s3, (error, buckets) => {
+          this.buckets  = buckets;
+        });
       });
-    });
 
   }
 
