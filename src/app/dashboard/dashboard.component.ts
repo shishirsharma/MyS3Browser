@@ -69,7 +69,7 @@ export class DashboardComponent implements OnInit {
         that.s3Marker = params['marker'] || null;
         that.searchPrefix = params['search'] || null;
         if(that.searchPrefix) {
-              this.alert = true;
+          this.alert = true;
         }
         //s3.s3_bucket = this.s3Bucket;
         that.dashboardRenderData(s3);
@@ -112,6 +112,29 @@ export class DashboardComponent implements OnInit {
   onUpdate($event) {
     let credential = this.credentialService.getCredential();
     this.dashboardRenderData(credential);
+  }
+
+  onDelete(key) {
+    this.credentialService
+      .s3
+      .subscribe(credential => {
+        AWS.config.update({
+          credentials: new AWS.Credentials(credential.access_key_id, credential.secret_access_key)
+        });
+        AWS.config.region = credential.s3_region;
+        let s3 = new AWS.S3();
+
+        let params = {
+          Bucket: this.s3Bucket,
+          Key: key
+        };
+
+        if(confirm('Are you sure you want to delete this?')) {
+          s3.deleteObject(params, (error, data) => {
+            this.dashboardRenderData(credential)
+          });
+        }
+      });
   }
 
   dashboardRenderData(credential) {

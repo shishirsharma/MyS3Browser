@@ -27,7 +27,7 @@
     <div class="card-header">
       <nav class="nav nav-light bg-light">
         <form class="form-inline">
-          <app-upload-modal [s3Prefix]="s3Prefix" [s3Bucket]="s3Bucket" (uploadFinished                                                                                                                                                                                                                                                                    )="onUpdate($event)"></app-upload-modal>
+          <app-upload-modal [s3Prefix]="s3Prefix" [s3Bucket]="s3Bucket" (uploadFinished)="onUpdate($event)"></app-upload-modal>
           <div class="input-group">
             <input id="buckets-search-query" type="text" class="form-control ml-sm-2" placeholder="Search current folder" name="serach_prefix" [(ngModel)]="searchPrefix" (keyup.enter)="onSearchKey($event)" aria-label="Search" aria-describedby="basic-addonsearch" >
             <span class="input-group-addon" id="basic-addonsearch" (click)="onSearch(searchPrefix)"><i class="fa fa-search" aria-hidden="true"></i></span>
@@ -48,11 +48,13 @@
             <th>Key</th>
             <th>Last Updated</th>
             <th>Size</th>
+            <th>Delete</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let file of files.CommonPrefixes">
             <td><span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span> <a class="s3-folder link-icon" [attr.filename]="'folder'" [routerLink]="['/index.html']" [queryParams]="{ bucket: s3Bucket, prefix: file.Prefix }"><strong>{{ file.HumanPrefix }}</strong></a></td>
+            <td></td>
             <td></td>
             <td></td>
           </tr>
@@ -61,6 +63,7 @@
             <td><a class="link-icon" [attr.filename]="file.Key" [href]="file.DownloadUrl" >{{file.HumanKey}}</a></td>
             <td>{{file.LastModified}}</td>
             <td>{{file.HumanSize}}</td>
+            <td><a (click)="onDelete(file.Key)" href="#" >&times;</a></td>
           </tr>
         </tbody>
       </table>
