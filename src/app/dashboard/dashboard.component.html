@@ -45,12 +45,6 @@
             <ng-container *ngSwitchCase="'create'" >Folder created successfully.</ng-container>
           </ng-container>
         </ngb-alert>
-
-      </div>
-      <div *ngIf="alert_upload" >
-        <ngb-alert [type]="'info'" [dismissible]="true" (close)="onDismisAlert('upload')" >
-
-        </ngb-alert>
       </div>
 
       <table id="fileTable" class="table">
