@@ -25,6 +25,7 @@ import { CredentialModalComponent } from './credential-modal/credential-modal.co
 import { UploadModalComponent } from './upload-modal/upload-modal.component';
 import { HelpModalComponent } from './help-modal/help-modal.component';
 import { NavbarDropdownMenuLinkComponent } from './navbar-dropdown-menu-link/navbar-dropdown-menu-link.component';
+import { CreateFolderModalComponent } from './create-folder-modal/create-folder-modal.component';
 
 @NgModule({
   imports: [
@@ -51,7 +52,8 @@ import { NavbarDropdownMenuLinkComponent } from './navbar-dropdown-menu-link/nav
     CredentialModalComponent,
     UploadModalComponent,
     HelpModalComponent,
-    NavbarDropdownMenuLinkComponent
+    NavbarDropdownMenuLinkComponent,
+    CreateFolderModalComponent
   ],
   // entryComponents: [ CredentialModalComponent ],
   providers: [ HeroService, MessageService, CredentialService, AwsS3Service ],

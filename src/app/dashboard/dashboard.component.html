@@ -27,18 +27,29 @@
     <div class="card-header">
       <nav class="nav nav-light bg-light">
         <form class="form-inline">
-          <app-upload-modal [s3Prefix]="s3Prefix" [s3Bucket]="s3Bucket" (uploadFinished)="onUpdate($event)"></app-upload-modal>
-          <div class="input-group">
-            <input id="buckets-search-query" type="text" class="form-control ml-sm-2" placeholder="Search current folder" name="serach_prefix" [(ngModel)]="searchPrefix" (keyup.enter)="onSearchKey($event)" aria-label="Search" aria-describedby="basic-addonsearch" >
-            <span class="input-group-addon" id="basic-addonsearch" (click)="onSearch(searchPrefix)"><i class="fa fa-search" aria-hidden="true"></i></span>
-          </div><!-- /input-group -->
+          <app-upload-modal [s3Prefix]="s3Prefix" [s3Bucket]="s3Bucket" (uploadFinished)="onUpdate($event, 'upload')"></app-upload-modal>
+          <app-create-folder-modal [s3Prefix]="s3Prefix" [s3Bucket]="s3Bucket" (uploadFinished)="onUpdate($event, 'create')"></app-create-folder-modal>
+            <div class="input-group">
+              <input id="buckets-search-query" type="text" class="form-control ml-sm-2" placeholder="Search current folder" name="serach_prefix" [(ngModel)]="searchPrefix" (keyup.enter)="onSearchKey($event)" aria-label="Search" aria-describedby="basic-addonsearch" >
+              <span class="input-group-addon" id="basic-addonsearch" (click)="onSearch(searchPrefix)"><i class="fa fa-search" aria-hidden="true"></i></span>
+            </div><!-- /input-group -->
         </form>
       </nav>
     </div>
     <div class="card-body">
       <div *ngIf="alert" >
         <ngb-alert [type]="'info'" [dismissible]="true" (close)="onDismisAlert()" >
-          Showing results of <strong>{{searchPrefix}}</strong> in <strong>{{s3Bucket}}/{{s3Prefix}}</strong>
+          <ng-container [ngSwitch]="alert_type">
+            <ng-container *ngSwitchCase="'search'">Showing results of <strong>{{searchPrefix}}</strong> in <strong>{{s3Bucket}}/{{s3Prefix}}</strong> </ng-container>
+            <ng-container *ngSwitchCase="'upload'" >File uploaded successfully.</ng-container>
+            <ng-container *ngSwitchCase="'create'" >Folder created successfully.</ng-container>
+          </ng-container>
+        </ngb-alert>
+
+      </div>
+      <div *ngIf="alert_upload" >
+        <ngb-alert [type]="'info'" [dismissible]="true" (close)="onDismisAlert('upload')" >
+
         </ngb-alert>
       </div>
 
@@ -72,7 +83,7 @@
       <nav aria-label="Page navigation example">
         <ul class="pagination justify-content-end">
           <li class="page-item">
-            <a class="page-link" (click)="goBack()" href="#" tabindex="-1">Previous</a>
+            <a class="page-link" (click)="goBack()" href="#" tabindex="-1" ngbTooltip="Go Back">Previous</a>
           </li>
           <!-- <li class="page-item"><a class="page-link" href="#">1</a></li>
                <li class="page-item"><a class="page-link" href="#">2</a></li>

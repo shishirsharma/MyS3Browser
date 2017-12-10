@@ -70,6 +70,7 @@ export class DashboardComponent implements OnInit {
         that.searchPrefix = params['search'] || null;
         if(that.searchPrefix) {
           this.alert = true;
+          this.alert_type = 'search';
         }
         //s3.s3_bucket = this.s3Bucket;
         that.dashboardRenderData(s3);
@@ -90,14 +91,17 @@ export class DashboardComponent implements OnInit {
   searchPrefix:string = '';
   onSearch(query) {
     this.alert = true;
+    this.alert_type = 'search';
     this.router.navigate(['/index.html'], {
       queryParams: { 'bucket': this.s3Bucket, 'prefix': this.s3Prefix, 'search': this.searchPrefix }
     });
   }
 
+
   alert:boolean = false;
-  onDismisAlert() {
-    this.alert = false;
+  alert_type:string = '';
+  onDismisAlert(type) {
+      this.alert = false;
   };
 
   goBack() {
@@ -109,8 +113,15 @@ export class DashboardComponent implements OnInit {
     this.dashboardRenderData(credential);
   }
 
-  onUpdate($event) {
+  onUpdate($event, extra) {
     let credential = this.credentialService.getCredential();
+    if(extra === 'upload') {
+      this.alert = true;
+      this.alert_type = 'upload';
+    } else if(extra === 'create') {
+      this.alert = true;
+      this.alert_type = 'create';
+    }
     this.dashboardRenderData(credential);
   }
 
