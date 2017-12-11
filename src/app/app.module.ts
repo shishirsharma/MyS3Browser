@@ -12,14 +12,10 @@ import { AppRoutingModule }     from './app-routing.module';
 
 import { CredentialService }    from './credential.service';
 import { AwsS3Service }         from './aws-s3.service';
-import { HeroService }          from './hero.service';
 import { MessageService }       from './message.service';
 
 import { AppComponent }         from './app.component';
 import { DashboardComponent }   from './dashboard/dashboard.component';
-import { HeroDetailComponent }  from './hero-detail/hero-detail.component';
-import { HeroesComponent }      from './heroes/heroes.component';
-import { HeroSearchComponent }  from './hero-search/hero-search.component';
 import { MessagesComponent }    from './messages/messages.component';
 import { CredentialModalComponent } from './credential-modal/credential-modal.component';
 import { UploadModalComponent } from './upload-modal/upload-modal.component';
@@ -45,10 +41,7 @@ import { CreateFolderModalComponent } from './create-folder-modal/create-folder-
   declarations: [
     AppComponent,
     DashboardComponent,
-    HeroesComponent,
-    HeroDetailComponent,
     MessagesComponent,
-    HeroSearchComponent,
     CredentialModalComponent,
     UploadModalComponent,
     HelpModalComponent,
@@ -56,7 +49,7 @@ import { CreateFolderModalComponent } from './create-folder-modal/create-folder-
     CreateFolderModalComponent
   ],
   // entryComponents: [ CredentialModalComponent ],
-  providers: [ HeroService, MessageService, CredentialService, AwsS3Service ],
+  providers: [ MessageService, CredentialService, AwsS3Service ],
   bootstrap: [ AppComponent ]
 })
 export class AppModule { }

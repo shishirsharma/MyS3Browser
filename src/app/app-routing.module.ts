@@ -3,15 +3,11 @@ import { RouterModule, Routes } from '@angular/router';
 import {APP_BASE_HREF} from '@angular/common';
 
 
-import { HeroesComponent }      from './heroes/heroes.component';
 import { DashboardComponent }      from './dashboard/dashboard.component';
-import { HeroDetailComponent }  from './hero-detail/hero-detail.component';
 
 const routes: Routes = [
   { path: 'index.html', component: DashboardComponent },
-  { path: '', redirectTo: 'index.html',  pathMatch: 'full'},
-  { path: 'detail/:id', component: HeroDetailComponent },
-  { path: 'heroes', component: HeroesComponent }
+  { path: '', redirectTo: 'index.html',  pathMatch: 'full'}
 ];
 
 @NgModule({

@@ -10,9 +10,6 @@ import { Observable } from 'rxjs/Rx';
 
 import * as AWS from 'aws-sdk';
 
-import { Hero } from '../hero';
-
-import { HeroService} from '../hero.service';
 import { AwsS3Service } from '../aws-s3.service';
 import { CredentialService } from '../credential.service';
 
@@ -25,8 +22,6 @@ import { CredentialModalComponent } from '../credential-modal/credential-modal.c
 })
 export class DashboardComponent implements OnInit {
   @ViewChild(CredentialModalComponent) private credentialModal:CredentialModalComponent;
-
-  heroes: Hero[] = [];
 
   public files = {
     'CommonPrefixes': [],
@@ -41,7 +36,6 @@ export class DashboardComponent implements OnInit {
   public s3Marker = "";
 
   constructor(
-    private heroService: HeroService,
     private awsS3Service: AwsS3Service,
     private credentialService: CredentialService,
     private location: Location,
@@ -52,8 +46,6 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     // console.log("dashboard.component#ngOnInit")
-    this.getHeroes();
-
     let that = this;
     this.sub = Observable
       .combineLatest(this.route.queryParams, this.credentialService.s3, (params, s3) => ({params, s3}))
@@ -176,11 +168,6 @@ export class DashboardComponent implements OnInit {
         this.files = files;
       }
     });
-  }
-
-  getHeroes(): void {
-    this.heroService.getHeroes()
-      .subscribe(heroes => this.heroes = heroes.slice(1, 5));
   }
 
 }
