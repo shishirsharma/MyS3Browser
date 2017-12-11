@@ -105,6 +105,7 @@ export class DashboardComponent implements OnInit {
   };
 
   goBack() {
+    this.alert = false;
     this.location.back(); // go back to previous location
   }
 
