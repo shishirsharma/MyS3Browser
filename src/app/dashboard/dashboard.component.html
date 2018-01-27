@@ -20,7 +20,7 @@
   <nav id="top-breadcrumb" aria-label="breadcrumb" role="navigation">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a class="s3-folder" data-prefix="" [routerLink]="['/index.html']" [queryParams]="{ bucket: s3Bucket }">s3://{{s3Bucket}}</a></li>
-      <li class="breadcrumb-item" *ngFor="let folder of s3Prefix.slice(0, -1).split('/'); index as i; last as isLast" [ngClass]="{'active': isLast}"><a [routerLink]="['/index.html']" [queryParams]="{ bucket: s3Bucket, prefix: s3Prefix.split('/').splice(0, i+1).join('/')+'/', marker: s3Marker }" *ngIf="!isLast">{{folder}}</a><span *ngIf="isLast">{{folder}}</span></li>
+      <li class="breadcrumb-item" *ngFor="let folder of s3Prefix.slice(0, -1).split('/'); index as i; last as isLast" [ngClass]="{'active': isLast}"><a [routerLink]="['/index.html']" [queryParams]="{ bucket: s3Bucket, prefix: s3Prefix.split('/').splice(0, i+1).join('/')+'/', marker: s3Marker }" *ngIf="!isLast">{{folder.split('+').join(' ')}}</a><span *ngIf="isLast">{{folder.split('+').join(' ')}}</span></li>
     </ol>
   </nav>
   <div class="card">

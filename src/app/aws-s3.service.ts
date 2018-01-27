@@ -37,7 +37,7 @@ export class AwsS3Service {
 
 
   listObjects(s3, s3Bucket, s3Prefix, s3Search, s3Marker, callback) {
-    var prefix = s3Prefix;
+    var prefix = s3Prefix.split('+').join(' ');
     if(s3Search) {
       prefix += s3Search;
     }
@@ -50,7 +50,7 @@ export class AwsS3Service {
     let params = {
       Bucket: s3Bucket,
       Delimiter: '/',
-      Prefix: decodeURIComponent(prefix),
+      Prefix: prefix, //decodeURIComponent(prefix),
       EncodingType: 'url',
       MaxKeys: 100
     };
@@ -77,11 +77,11 @@ export class AwsS3Service {
         // successful response
         if (window.console) { console.log('[function.listObjects]', 'Folders:', files.CommonPrefixes.length, 'Files:', files.Contents.length); }
         files.CommonPrefixes = files.CommonPrefixes.map((item) => {
-          item.HumanPrefix = item.Prefix.replace('+', ' ').replace(s3Prefix, '')
+          item.HumanPrefix = decodeURIComponent(item.Prefix.split('+').join(' ').replace(prefix, ''));
           return item;
         });
         files.Contents = files.Contents.map((item) => {
-          item.HumanKey = item.Key.replace('+', ' ').replace(s3Prefix, '')
+          item.HumanKey = decodeURIComponent(item.Key.split('+').join(' ').replace(prefix, ''));
           item.HumanSize = humanFileSize(item.Size, true);
           item.DownloadUrl = s3.getSignedUrl('getObject', {Bucket: s3Bucket, Key: decodeURIComponent(item.Key.replace('+', ' '))});
           return item;
