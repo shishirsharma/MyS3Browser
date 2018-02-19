@@ -27,16 +27,26 @@ function humanFileSize(bytes, si) {
 
 @Injectable()
 export class AwsS3Service {
-
+  s3;
   constructor(
     private credentialService: CredentialService,
     private messageService: MessageService
   ) {
-    let credential = this.credentialService.getCredential();
+    // let credential = this.credentialService.getCredential();
+    let that = this;
+    this.credentialService
+      .s3
+      .subscribe(credential => {
+        AWS.config.update({
+          credentials: new AWS.Credentials(credential.access_key_id, credential.secret_access_key)
+        });
+        AWS.config.region = credential.s3_region;
+        that.s3 = new AWS.S3();
+      });
   }
 
-
-  listObjects(s3, s3Bucket, s3Prefix, s3Search, s3Marker, callback) {
+  listObjects(s3Bucket, s3Prefix, s3Search, s3Marker, callback) {
+    let s3 = this.s3;
     var prefix = s3Prefix.split('+').join(' ');
     if(s3Search) {
       prefix += s3Search;
@@ -149,7 +159,8 @@ export class AwsS3Service {
 
   }
 
-  listBuckets(s3, callback) {
+  listBuckets(callback) {
+    let s3 = this.s3;
     if (window.console) { console.log('[function.listBuckets]', 'starting'); }
     s3.listBuckets(function(err, buckets) {
       if (err) {
