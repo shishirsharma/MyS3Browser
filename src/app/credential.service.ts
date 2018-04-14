@@ -17,9 +17,12 @@ export class CredentialService {
   // private _s3:Subject<any> = new Subject<any>();
   // private _s3 = new BehaviorSubject<any>({});
   private _s3;
+  private _credentials;
   // public readonly s3: Observable<any> = this._s3.asObservable();
   // public readonly s3 = this._s3.asObservable();
   public readonly s3;
+  public readonly credential;
+  public readonly credentials;
 
   constructor(
 //    private storage: localStorage,
@@ -27,7 +30,11 @@ export class CredentialService {
   ) {
     let c = this.getCredential()
     this._s3 = new BehaviorSubject<any>(c);
+    this._credentials = new BehaviorSubject<any>([c]);
     this.s3 = this._s3.asObservable();
+    this.credential = this._s3.asObservable();
+    this.credentials = this._s3.asObservable();
+
     this.updateAwsCredential(c);
   }
 
@@ -45,6 +52,17 @@ export class CredentialService {
     }
   }
 
+  getAllCredential (): Credential[] {
+    let ss = JSON.parse(window.localStorage.getItem('allCredentials'));
+    if(ss) {
+      return ss.map((s) => {
+        return new Credential(s.access_key_id, s.secret_access_key, s.s3_region, s.s3_bucket);
+      })
+    } else {
+      return [new Credential('', '', '', '')];
+    }
+  }
+
   updateAwsCredential(c) {
     // AWS.config.update({
     //   credentials: new AWS.Credentials(c.access_key_id, c.secret_access_key)
@@ -59,5 +77,12 @@ export class CredentialService {
     let c = JSON.stringify(credential);
     console.log(c);
     window.localStorage.setItem('credential', c);
+  }
+
+  setAllCredential(credential) {
+    this.updateAwsCredential(credential)
+    let c = JSON.stringify(credential);
+    console.log(c);
+    window.localStorage.setItem('allCredentials', c);
   }
 }

@@ -35,10 +35,21 @@ export class NavbarDropdownMenuLinkComponent implements OnInit {
     //       this.buckets  = buckets;
     //     });
     //   });
-    let s3 = '';
-    this.awsS3Service.listBuckets((error, buckets) => {
-      this.buckets  = buckets;
-    });
+
+    this.credentialService
+      .s3
+      .subscribe(credential => {
+        console.log('navbar-dropdown-menu-link.component#ngOnInit: Observable', credential);
+
+        this.awsS3Service.listBuckets((error, buckets) => {
+          this.buckets  = buckets;
+        });
+      });
+
+    // let s3 = '';
+    // this.awsS3Service.listBuckets((error, buckets) => {
+    //   this.buckets  = buckets;
+    // });
 
   }
 

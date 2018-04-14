@@ -16,6 +16,14 @@ import { CredentialService } from '../credential.service';
 
 import { CredentialModalComponent } from '../credential-modal/credential-modal.component';
 
+interface AlertData {
+  type: string;
+  category?: string;
+  msg?: string;
+  meta?: { width: number; height: number; };
+}
+
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -63,8 +71,10 @@ export class DashboardComponent implements OnInit {
         that.s3Marker = params['marker'] || null;
         that.searchPrefix = params['search'] || null;
         if(that.searchPrefix) {
-          this.alert = true;
-          this.alert_type = 'search';
+          this.alert = {
+            type: 'info',
+            category: 'search'
+          }
         }
         //s3.s3_bucket = this.s3Bucket;
         // console.log(s3);
@@ -82,12 +92,22 @@ export class DashboardComponent implements OnInit {
             that.dashboardRenderData(s3);
           } else {
             that.awsS3Service.listBuckets((error, buckets) => {
-              /// this.buckets  = buckets;
-              console.log('dashboard.component#ngOnInit', buckets)
-              if(buckets) {
-                that.s3Bucket = buckets[0].Name;
+              if(error) {
+                console.log('dashboard.component#dashboardRenderData: error in listObjects open credentialModal');
+                this.error = {
+                  type: 'danger',
+                  category: 'custom',
+                  msg: error.message
+                };
+                this.credentialModal.open();
+              } else {
+                /// this.buckets  = buckets;
+                console.log('dashboard.component#ngOnInit', buckets)
+                if(buckets) {
+                  that.s3Bucket = buckets[0].Name;
+                }
+                that.dashboardRenderData(s3);
               }
-              that.dashboardRenderData(s3);
             });
           }
         } else {
@@ -109,22 +129,29 @@ export class DashboardComponent implements OnInit {
 
   searchPrefix:string = '';
   onSearch(query) {
-    this.alert = true;
-    this.alert_type = 'search';
+    this.alert = {
+      type: 'info',
+      category: 'search'
+    }
+
     this.router.navigate(['/index.html'], {
       queryParams: { 'bucket': this.s3Bucket, 'prefix': this.s3Prefix, 'search': this.searchPrefix }
     });
   }
 
 
-  alert:boolean = false;
-  alert_type:string = '';
-  onDismisAlert(type) {
-      this.alert = false;
+  alert:AlertData;
+  onDismisAlert() {
+    this.alert = null;
+  };
+
+  error:AlertData;
+  onDismisError() {
+    this.error = null;
   };
 
   goBack() {
-    this.alert = false;
+    this.alert = null;
     this.location.back(); // go back to previous location
   }
 
@@ -136,11 +163,15 @@ export class DashboardComponent implements OnInit {
   onUpdate($event, extra) {
     let credential = this.credentialService.getCredential();
     if(extra === 'upload') {
-      this.alert = true;
-      this.alert_type = 'upload';
+      this.alert = {
+        type: 'info',
+        category: 'upload'
+      };
     } else if(extra === 'create') {
-      this.alert = true;
-      this.alert_type = 'create';
+      this.alert = {
+        type: 'info',
+        category: 'create'
+      };
     }
     this.dashboardRenderData(credential);
   }
@@ -186,11 +217,15 @@ export class DashboardComponent implements OnInit {
           'Contents': [],
           'NextMarker': ''
         };
-        this.aws_error = true;
         console.log('dashboard.component#dashboardRenderData: error in listObjects open credentialModal');
-        this.credentialModal.open();
+        this.error = {
+          type: 'danger',
+          category: 'custom',
+          msg: error.message
+        };
+        // this.credentialModal.open();
       } else {
-        this.aws_error = false;
+        this.error = null;
         this.files = files;
       }
     });

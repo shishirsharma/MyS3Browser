@@ -22,7 +22,6 @@ import { UploadModalComponent } from './upload-modal/upload-modal.component';
 import { HelpModalComponent } from './help-modal/help-modal.component';
 import { NavbarDropdownMenuLinkComponent } from './navbar-dropdown-menu-link/navbar-dropdown-menu-link.component';
 import { CreateFolderModalComponent } from './create-folder-modal/create-folder-modal.component';
-import { NavbarDropdownCredentialMenuComponentComponent } from './navbar-dropdown-credential-menu-component/navbar-dropdown-credential-menu-component.component';
 import { NavbarDropdownCredentialMenuComponent } from './navbar-dropdown-credential-menu/navbar-dropdown-credential-menu.component';
 
 @NgModule({

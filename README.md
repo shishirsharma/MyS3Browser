@@ -9,6 +9,11 @@
 
 Close all Chrome processes and Refer this [this](https://stackoverflow.com/questions/3102819/disable-same-origin-policy-in-chrome). 
 
+Mac
+```
+open /Applications/Google\ Chrome.app --args --user-data-dir --disable-web-security
+```
+Linux
 ```
 chromium-browser --disable-web-security --user-data-dir
 ```

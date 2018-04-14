@@ -37,8 +37,16 @@ export class AwsS3Service {
     this.credentialService
       .s3
       .subscribe(credential => {
+        let credentials = new AWS.Credentials(credential.access_key_id, credential.secret_access_key);
+        // credentials.get(function(err) {
+        //   if (err) {
+        //     // if (window.console) { console.log("ERROR!") }
+        //   } else {
+        //     // console.log("Keys are OK")
+        //   }
+        // })
         AWS.config.update({
-          credentials: new AWS.Credentials(credential.access_key_id, credential.secret_access_key)
+          credentials: credentials
         });
         AWS.config.region = credential.s3_region;
         that.s3 = new AWS.S3();
