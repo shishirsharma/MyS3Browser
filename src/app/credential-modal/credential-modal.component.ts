@@ -15,6 +15,7 @@ export class CredentialModalComponent implements OnInit {
   @ViewChild('credentialModal') private content: TemplateRef<any>;
 
   closeResult: string;
+  state: boolean = false;
 
   modalRef: NgbModalRef;
 
@@ -36,18 +37,22 @@ export class CredentialModalComponent implements OnInit {
   }
 
   open() {
-    this.modalRef = this.modalService.open(this.content);
-    this.modalRef.result.then((result) => {
-      this.closeResult = `Closed with: ${result}`;
-    }, (reason) => {
-      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-    });
+    if(!this.state) {
+      this.state = true;
+      this.modalRef = this.modalService.open(this.content);
+      this.modalRef.result.then((result) => {
+        this.closeResult = `Closed with: ${result}`;
+      }, (reason) => {
+        this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      });
+    }
   }
 
   onSubmit(content) {
     this.submitted = true;
     this.credentialService.setCredential(this.model);
     this.modalRef.close();
+    this.state = false;
     this.credentialUpdate.emit(null);
   }
 
