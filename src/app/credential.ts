@@ -5,6 +5,7 @@ export class Credential {
     public secret_access_key: string,
     public s3_region: string,
     public s3_bucket: string,
+    public name: string = ''
   ) {  }
 
 }

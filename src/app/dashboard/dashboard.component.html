@@ -7,6 +7,9 @@
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav ml-auto">
       <li class="nav-item dropdown ">
+        <app-navbar-dropdown-credential-menu ></app-navbar-dropdown-credential-menu>
+      </li>
+      <li class="nav-item dropdown ">
         <app-navbar-dropdown-menu-link [currentBucket]="s3Bucket" ></app-navbar-dropdown-menu-link>
       </li>
     </ul>
@@ -38,11 +41,19 @@
     </div>
     <div class="card-body">
       <div *ngIf="alert" >
-        <ngb-alert [type]="'info'" [dismissible]="true" (close)="onDismisAlert()" >
-          <ng-container [ngSwitch]="alert_type">
+        <ngb-alert [type]="alert.type" [dismissible]="true" (close)="onDismisAlert()" >
+          <ng-container [ngSwitch]="alert.category">
             <ng-container *ngSwitchCase="'search'">Showing results of <strong>{{searchPrefix}}</strong> in <strong>{{s3Bucket}}/{{s3Prefix}}</strong> </ng-container>
             <ng-container *ngSwitchCase="'upload'" >File uploaded successfully.</ng-container>
             <ng-container *ngSwitchCase="'create'" >Folder created successfully.</ng-container>
+            <ng-container *ngSwitchCase="'custom'" >{{alert.msg}}</ng-container>
+          </ng-container>
+        </ngb-alert>
+      </div>
+      <div *ngIf="error" >
+        <ngb-alert [type]="error.type" [dismissible]="true" (close)="onDismisError()" >
+          <ng-container [ngSwitch]="error.category">
+            <ng-container *ngSwitchCase="'custom'" >{{error.msg}}</ng-container>
           </ng-container>
         </ngb-alert>
       </div>
