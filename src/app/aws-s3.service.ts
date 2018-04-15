@@ -68,7 +68,7 @@ export class AwsS3Service {
     let params = {
       Bucket: s3Bucket,
       Delimiter: '/',
-      Prefix: prefix, //decodeURIComponent(prefix),
+      Prefix: decodeURIComponent(prefix), // prefix
       EncodingType: 'url',
       MaxKeys: 100
     };
@@ -95,7 +95,7 @@ export class AwsS3Service {
         // successful response
         if (window.console) { console.log('[function.listObjects]', 'Folders:', files.CommonPrefixes.length, 'Files:', files.Contents.length); }
         files.CommonPrefixes = files.CommonPrefixes.map((item) => {
-          item.HumanPrefix = decodeURIComponent(item.Prefix.split('+').join(' ').replace(prefix, ''));
+          item.HumanPrefix = decodeURIComponent(item.Prefix.split('\+').join(' ').replace(prefix, ''));
           return item;
         });
         files.Contents = files.Contents.map((item) => {
