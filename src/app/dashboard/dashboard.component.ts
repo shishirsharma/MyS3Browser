@@ -127,10 +127,11 @@ export class DashboardComponent implements OnInit {
         });
         AWS.config.region = credential.s3_region;
         let s3 = new AWS.S3();
+        var fixed_key = key.split('+').join(' ');
 
         let params = {
           Bucket: this.s3Bucket,
-          Key: key
+          Key: decodeURIComponent(fixed_key) // decodeURIComponent(prefix)
         };
 
         if(confirm('Are you sure you want to delete this?')) {
