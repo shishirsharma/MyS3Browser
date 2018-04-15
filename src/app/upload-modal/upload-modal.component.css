@@ -8,3 +8,10 @@ $custom-file-text: (
     es: "Navegar"
   )
 );
+
+
+.custom-file-input.selected {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
