@@ -78,8 +78,9 @@ export class UploadModalComponent implements OnInit {
     let reader = new FileReader();
     reader.readAsDataURL(this.file);
     reader.onload = () => {
+      let prefix = this.s3Prefix.split('+').join(' ');
       var params = {
-        Key: this.s3Prefix + content.controls.filename.value,
+        Key: decodeURIComponent(prefix + content.controls.filename.value),
         ContentType: this.file.type,
         Body: reader.result,
         Bucket: this.s3Bucket
