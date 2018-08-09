@@ -2,11 +2,19 @@ import { Component, OnInit, Input, Output, EventEmitter, ViewChild, TemplateRef}
 
 import { NgbModal, ModalDismissReasons, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
-// import { FileReader } from 'filereader';
+//import { FileReader } from 'filereader';
 import * as AWS from 'aws-sdk';
 
 import { CredentialService } from '../credential.service';
 
+interface FileReaderEventTarget extends EventTarget {
+  result:string
+};
+
+interface FileReaderEvent extends Event {
+  target: FileReaderEventTarget;
+  getMessage():string;
+};
 
 
 @Component({
@@ -75,16 +83,31 @@ export class UploadModalComponent implements OnInit {
   onSubmit(content) {
     let that = this;
     let credential = this.credentialService.getCredential();
-    let reader = new FileReader();
-    reader.readAsDataURL(this.file);
-    reader.onload = () => {
+    let reader: FileReader = new FileReader();
+    reader.onload = (e:FileReaderEvent) => {
       let prefix = this.s3Prefix.split('+').join(' ');
-      var params = {
-        Key: decodeURIComponent(prefix + content.controls.filename.value),
-        ContentType: this.file.type,
-        Body: reader.result,
+      let filename = content.controls.filename.value || this.file.name;
+      let result = e.target.result;
+      // let result = reader.result;
+      // let buf = new Buffer(result.replace(/^data:.*;base64,/, ''), 'base64');
+      let params = {
+        Key: decodeURIComponent(prefix + filename),
+        Body: result,
+        // Body: buf,
+        // Body: result.replace(/^data:.*;base64,/, ''),
+        // ContentEncoding: 'base64',
+        ContentEncoding: 'identity',
         Bucket: this.s3Bucket
       };
+      // let contenttype = result.match(/^data:(.*\/.*);base64,/);
+      // if(contenttype) {
+      //   params['ContentType'] = contenttype[1];
+      // }
+
+      if(that.file.type !== '') {
+        params['ContentType'] = that.file.type;
+      }
+
       if (window.console) { console.log('Started upload'); }
       that.s3.upload(params, function(err, data) {
         if (window.console) { console.log(err ? 'ERROR!' : 'UPLOADED!'); }
@@ -95,6 +118,10 @@ export class UploadModalComponent implements OnInit {
         that.uploadFinished.emit(null);
       });
     };
+
+    //reader.readAsDataURL(this.file);
+    // reader.readAsBinaryString(this.file)
+    reader.readAsArrayBuffer(this.file)
   }
 
 
