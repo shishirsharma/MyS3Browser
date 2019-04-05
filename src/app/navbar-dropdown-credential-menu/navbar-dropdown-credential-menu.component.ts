@@ -29,5 +29,5 @@ export class NavbarDropdownCredentialMenuComponent implements OnInit {
 
   ngOnInit() {
   }
-
+  currentCredential: any;
 }

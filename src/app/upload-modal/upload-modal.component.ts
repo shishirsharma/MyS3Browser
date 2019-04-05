@@ -107,12 +107,13 @@ export class UploadModalComponent implements OnInit {
       if(that.file.type !== '') {
         params['ContentType'] = that.file.type;
       }
-
-      if (window.console) { console.log('Started upload'); }
+      if (content.controls['header-cache-value'] && content.controls['header-cache-value'].value) {
+        params['CacheControl'] = 'max-age=' + content.controls['header-cache-value'].value;
+      }
       that.s3.upload(params, function(err, data) {
         if (window.console) { console.log(err ? 'ERROR!' : 'UPLOADED!'); }
         if (!err) {
-          if (window.console) { console.log('Finished upload' + data); }
+          if (window.console) { console.log('Finished upload', data); }
         }
         that.modalRef.close();
         that.uploadFinished.emit(null);
