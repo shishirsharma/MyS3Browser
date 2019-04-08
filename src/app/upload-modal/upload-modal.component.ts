@@ -109,6 +109,9 @@ export class UploadModalComponent implements OnInit {
       }
 
       if (window.console) { console.log('Started upload'); }
+      if (content.controls['header-cache-value'] && content.controls['header-cache-value'].value) {
+        params['CacheControl'] = 'max-age=' + content.controls['header-cache-value'].value;
+      }
       that.s3.upload(params, function(err, data) {
         if (window.console) { console.log(err ? 'ERROR!' : 'UPLOADED!'); }
         if (!err) {

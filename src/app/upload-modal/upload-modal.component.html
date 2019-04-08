@@ -9,6 +9,10 @@
         <label class="control-label">File Name</label>
         <input type="text" class="form-control" id="aws-key" placeholder="File Name" ngModel name="filename" required>
       </div>
+      <div class="form-group required">
+        <label class="control-label">Cache-Control (optional)</label>
+        <input type="text" class="form-control" id="aws-header-cache-value" placeholder="max-age in seconds( e.g. 31536000 )" ngModel name="header-cache-value">
+      </div>
       <div class="form-group">
         <label class="custom-file">
           <input type="file" id="file-chooser" (change)="onFileChange($event)" ngModel name="uploadfile" class="custom-file-input">
