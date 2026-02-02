@@ -69,11 +69,13 @@ async function loadObjects(continuationToken?: string) {
   s3Store.setError(null);
 
   try {
+    const bucketRegion = s3Store.getBucketRegion(s3Store.currentBucket);
     const result = await s3Service.listObjects(
       credentialsStore.activeCredential,
       s3Store.currentBucket,
       s3Store.currentPrefix,
-      continuationToken
+      continuationToken,
+      bucketRegion
     );
 
     s3Store.setListResult(result.folders, result.objects, result.nextToken);
@@ -100,10 +102,12 @@ async function downloadFile(key: string) {
   if (!credentialsStore.activeCredential || !s3Store.currentBucket) return;
 
   try {
+    const bucketRegion = s3Store.getBucketRegion(s3Store.currentBucket);
     await s3Service.downloadObject(
       credentialsStore.activeCredential,
       s3Store.currentBucket,
-      key
+      key,
+      bucketRegion
     );
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed to download file';
@@ -115,10 +119,12 @@ async function deleteFile(key: string) {
   if (!credentialsStore.activeCredential || !s3Store.currentBucket) return;
 
   try {
+    const bucketRegion = s3Store.getBucketRegion(s3Store.currentBucket);
     await s3Service.deleteObject(
       credentialsStore.activeCredential,
       s3Store.currentBucket,
-      key
+      key,
+      bucketRegion
     );
     s3Store.removeObject(key);
     showAlert('File deleted successfully', 'success');
@@ -132,10 +138,12 @@ async function deleteFolder(prefix: string) {
   if (!credentialsStore.activeCredential || !s3Store.currentBucket) return;
 
   try {
+    const bucketRegion = s3Store.getBucketRegion(s3Store.currentBucket);
     await s3Service.deleteObject(
       credentialsStore.activeCredential,
       s3Store.currentBucket,
-      prefix
+      prefix,
+      bucketRegion
     );
     s3Store.removeFolder(prefix);
     showAlert('Folder deleted successfully', 'success');

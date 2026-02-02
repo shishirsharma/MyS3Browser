@@ -29,4 +29,5 @@ export interface S3ListResult {
 export interface BucketInfo {
   name: string;
   creationDate?: Date;
+  region?: string;
 }

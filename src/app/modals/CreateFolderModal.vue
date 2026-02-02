@@ -68,10 +68,12 @@ async function onCreate() {
   isCreating.value = true;
 
   try {
+    const bucketRegion = s3Store.getBucketRegion(currentBucket.value);
     await createFolder(
       credentialsStore.activeCredential,
       currentBucket.value,
-      fullPrefix.value
+      fullPrefix.value,
+      bucketRegion
     );
 
     emit('created');

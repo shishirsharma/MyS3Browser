@@ -5,6 +5,7 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
+  GetBucketLocationCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { Credential, BucketInfo, S3ListResult, S3Object, S3Folder } from '@/types';
@@ -19,15 +20,26 @@ function formatBytes(bytes: number): string {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-export function initializeClient(credential: Credential): S3Client {
+export function initializeClient(credential: Credential, region?: string): S3Client {
+  const clientRegion = region || credential.region;
   s3Client = new S3Client({
-    region: credential.region,
+    region: clientRegion,
     credentials: {
       accessKeyId: credential.accessKeyId,
       secretAccessKey: credential.secretAccessKey,
     },
   });
   return s3Client;
+}
+
+function createClientForRegion(credential: Credential, region: string): S3Client {
+  return new S3Client({
+    region,
+    credentials: {
+      accessKeyId: credential.accessKeyId,
+      secretAccessKey: credential.secretAccessKey,
+    },
+  });
 }
 
 export function getClient(): S3Client | null {
@@ -40,19 +52,49 @@ export async function listBuckets(credential: Credential): Promise<BucketInfo[]>
   const command = new ListBucketsCommand({});
   const response = await client.send(command);
 
-  return (response.Buckets || []).map(bucket => ({
-    name: bucket.Name || '',
-    creationDate: bucket.CreationDate,
-  }));
+  const buckets = response.Buckets || [];
+
+  // Fetch region for each bucket
+  const bucketsWithRegions = await Promise.all(
+    buckets.map(async (bucket) => {
+      const bucketName = bucket.Name || '';
+      let region: string | undefined;
+
+      try {
+        const locationCommand = new GetBucketLocationCommand({
+          Bucket: bucketName,
+        });
+        const locationResponse = await client.send(locationCommand);
+
+        // AWS returns null for us-east-1, need to handle this
+        region = locationResponse.LocationConstraint || 'us-east-1';
+      } catch (error) {
+        console.warn(`Failed to get region for bucket ${bucketName}:`, error);
+        // Fall back to credential region if we can't determine bucket region
+        region = credential.region;
+      }
+
+      return {
+        name: bucketName,
+        creationDate: bucket.CreationDate,
+        region,
+      };
+    })
+  );
+
+  return bucketsWithRegions;
 }
 
 export async function listObjects(
   credential: Credential,
   bucket: string,
   prefix: string = '',
-  continuationToken?: string
+  continuationToken?: string,
+  bucketRegion?: string
 ): Promise<S3ListResult> {
-  const client = initializeClient(credential);
+  const client = bucketRegion
+    ? createClientForRegion(credential, bucketRegion)
+    : initializeClient(credential);
 
   const command = new ListObjectsV2Command({
     Bucket: bucket,
@@ -101,9 +143,12 @@ export async function uploadFile(
   bucket: string,
   key: string,
   file: File,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: number) => void,
+  bucketRegion?: string
 ): Promise<void> {
-  const client = initializeClient(credential);
+  const client = bucketRegion
+    ? createClientForRegion(credential, bucketRegion)
+    : initializeClient(credential);
 
   // Read file as ArrayBuffer
   const arrayBuffer = await file.arrayBuffer();
@@ -128,9 +173,12 @@ export async function uploadFile(
 export async function deleteObject(
   credential: Credential,
   bucket: string,
-  key: string
+  key: string,
+  bucketRegion?: string
 ): Promise<void> {
-  const client = initializeClient(credential);
+  const client = bucketRegion
+    ? createClientForRegion(credential, bucketRegion)
+    : initializeClient(credential);
 
   const command = new DeleteObjectCommand({
     Bucket: bucket,
@@ -143,9 +191,12 @@ export async function deleteObject(
 export async function createFolder(
   credential: Credential,
   bucket: string,
-  prefix: string
+  prefix: string,
+  bucketRegion?: string
 ): Promise<void> {
-  const client = initializeClient(credential);
+  const client = bucketRegion
+    ? createClientForRegion(credential, bucketRegion)
+    : initializeClient(credential);
 
   // Create folder by uploading an empty object with trailing slash
   const folderKey = prefix.endsWith('/') ? prefix : prefix + '/';
@@ -163,9 +214,12 @@ export async function getDownloadUrl(
   credential: Credential,
   bucket: string,
   key: string,
-  expiresIn: number = 3600
+  expiresIn: number = 3600,
+  bucketRegion?: string
 ): Promise<string> {
-  const client = initializeClient(credential);
+  const client = bucketRegion
+    ? createClientForRegion(credential, bucketRegion)
+    : initializeClient(credential);
 
   const command = new GetObjectCommand({
     Bucket: bucket,
@@ -179,9 +233,10 @@ export async function getDownloadUrl(
 export async function downloadObject(
   credential: Credential,
   bucket: string,
-  key: string
+  key: string,
+  bucketRegion?: string
 ): Promise<void> {
-  const url = await getDownloadUrl(credential, bucket, key);
+  const url = await getDownloadUrl(credential, bucket, key, 3600, bucketRegion);
 
   // Extract filename from key
   const filename = key.split('/').pop() || key;

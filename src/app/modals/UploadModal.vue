@@ -92,6 +92,7 @@ async function onUpload() {
   uploadProgress.value = 0;
 
   try {
+    const bucketRegion = s3Store.getBucketRegion(currentBucket.value);
     await uploadFile(
       credentialsStore.activeCredential,
       currentBucket.value,
@@ -99,7 +100,8 @@ async function onUpload() {
       selectedFile.value,
       (progress) => {
         uploadProgress.value = progress;
-      }
+      },
+      bucketRegion
     );
 
     emit('uploaded');
