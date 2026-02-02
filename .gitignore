@@ -8,6 +8,16 @@
 # dependencies
 /node_modules
 
+# Environment files
+.env
+.env.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+*.log
+
 # IDEs and editors
 /.idea
 .project
