@@ -20,6 +20,10 @@ This occurred because `credentials.value` was not always an array, breaking `.fi
 
 3. **Old bug in Angular code**: The old `setAllCredential()` function could store a single object instead of an array
 
+4. **Component lifecycle race condition**: Dashboard's `onMounted` runs before App's credential loading completes, causing:
+   - Credential modal shown even when credentials exist
+   - S3 data not loading because watchers trigger before credentials are ready
+
 ## Solutions Implemented
 
 ### 1. Migration Logic (`src/app/stores/credentials.ts`)
@@ -41,7 +45,15 @@ Added validation in all functions that use array methods:
 - `setActiveCredential()`
 - `getCredentialByName()`
 
-### 3. Comprehensive Unit Tests (`src/app/stores/credentials.test.ts`)
+### 3. Dashboard Initialization Fix (`src/app/views/Dashboard.vue`)
+
+Fixed race condition where Dashboard mounted before credentials finished loading:
+- Added `initializeDashboard()` helper function
+- Wait for `credentialsStore.isLoading` to become false before checking credentials
+- Ensures credential modal only shows when truly no credentials exist
+- Ensures S3 data loads properly after credentials are ready
+
+### 4. Comprehensive Unit Tests (`src/app/stores/credentials.test.ts`)
 
 Created 12 unit tests covering all scenarios:
 - ✅ Empty storage (new install)
