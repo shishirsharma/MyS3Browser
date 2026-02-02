@@ -2,11 +2,13 @@
 import { ref } from 'vue';
 import BucketDropdown from './BucketDropdown.vue';
 import CredentialDropdown from './CredentialDropdown.vue';
+import type { Credential } from '@/types';
 
 const emit = defineEmits<{
   search: [query: string];
   showHelp: [];
   showCredentialModal: [];
+  editCredentialModal: [credential: Credential];
   showUploadModal: [];
   showCreateFolderModal: [];
 }>();
@@ -40,13 +42,16 @@ function clearSearch() {
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <div class="collapse navbar-collapse" id="navbarContent">
+      <div class="navbar-collapse" id="navbarContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
             <BucketDropdown />
           </li>
           <li class="nav-item">
-            <CredentialDropdown @add-new="$emit('showCredentialModal')" />
+            <CredentialDropdown
+              @add-new="$emit('showCredentialModal')"
+              @edit="(cred) => $emit('editCredentialModal', cred)"
+            />
           </li>
         </ul>
 

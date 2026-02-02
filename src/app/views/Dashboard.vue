@@ -10,12 +10,14 @@ import CredentialModal from '../modals/CredentialModal.vue';
 import UploadModal from '../modals/UploadModal.vue';
 import CreateFolderModal from '../modals/CreateFolderModal.vue';
 import HelpModal from '../modals/HelpModal.vue';
+import type { Credential } from '@/types';
 
 const credentialsStore = useCredentialsStore();
 const s3Store = useS3Store();
 
 // Modal visibility state
 const showCredentialModal = ref(false);
+const editingCredential = ref<Credential | null>(null);
 const showUploadModal = ref(false);
 const showCreateFolderModal = ref(false);
 const showHelpModal = ref(false);
@@ -172,6 +174,21 @@ function onSearch(query: string) {
   s3Store.setSearchQuery(query);
 }
 
+function openAddCredentialModal() {
+  editingCredential.value = null;
+  showCredentialModal.value = true;
+}
+
+function openEditCredentialModal(credential: Credential) {
+  editingCredential.value = credential;
+  showCredentialModal.value = true;
+}
+
+function closeCredentialModal() {
+  showCredentialModal.value = false;
+  editingCredential.value = null;
+}
+
 async function onCredentialSaved() {
   await loadBuckets();
   showAlert('Credential saved successfully', 'success');
@@ -226,7 +243,7 @@ async function initializeDashboard() {
     await loadBuckets();
   } else if (credentialsStore.credentials.length === 0) {
     // Show credential modal if no credentials saved
-    showCredentialModal.value = true;
+    openAddCredentialModal();
   }
 }
 </script>
@@ -236,7 +253,8 @@ async function initializeDashboard() {
     <Navbar
       @search="onSearch"
       @show-help="showHelpModal = true"
-      @show-credential-modal="showCredentialModal = true"
+      @show-credential-modal="openAddCredentialModal"
+      @edit-credential-modal="openEditCredentialModal"
       @show-upload-modal="showUploadModal = true"
       @show-create-folder-modal="showCreateFolderModal = true"
     />
@@ -258,7 +276,7 @@ async function initializeDashboard() {
       <i class="bi bi-key display-1 text-muted"></i>
       <h4 class="mt-3">No Credentials Configured</h4>
       <p class="text-muted">Add your AWS credentials to start browsing S3 buckets</p>
-      <button class="btn btn-primary" @click="showCredentialModal = true">
+      <button class="btn btn-primary" @click="openAddCredentialModal">
         <i class="bi bi-plus-circle me-2"></i>
         Add Credential
       </button>
@@ -314,7 +332,8 @@ async function initializeDashboard() {
     <!-- Modals -->
     <CredentialModal
       :show="showCredentialModal"
-      @close="showCredentialModal = false"
+      :edit-credential="editingCredential"
+      @close="closeCredentialModal"
       @saved="onCredentialSaved"
     />
 
