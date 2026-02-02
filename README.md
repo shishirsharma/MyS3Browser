@@ -1,39 +1,95 @@
-# MyS3Browser
+# My S3 Browser
 
+A modern Chrome extension for browsing and managing Amazon S3 buckets, built with Vue 3, TypeScript, and AWS SDK v3.
 
+## Features
 
-# Local Setup Quickstart
+- Browse S3 buckets and folders
+- Upload files to S3
+- Download files with pre-signed URLs
+- Create folders
+- Delete files and folders
+- Search within current folder
+- Pagination for large folders
+- Multiple AWS credential profiles
+- Manifest V3 compliant
 
+## Tech Stack
 
-## Development server
+- **Framework**: Vue 3 with Composition API
+- **Language**: TypeScript 5.x
+- **Build Tool**: Vite
+- **AWS SDK**: v3 (modular)
+- **UI**: Bootstrap 5 + Bootstrap Icons
+- **State**: Pinia
+- **Manifest**: V3
 
-Close all Chrome processes and Refer this [this](https://stackoverflow.com/questions/3102819/disable-same-origin-policy-in-chrome). 
+## Development
 
-Mac
+### Prerequisites
+
+- Node.js 18+ and npm
+- Chrome browser
+
+### Installation
+
+```bash
+npm install
 ```
-open /Applications/Google\ Chrome.app --args --user-data-dir --disable-web-security
+
+### Development Server
+
+```bash
+npm run dev
 ```
-Linux
+
+This will start Vite in watch mode. The extension will be built to the `dist/` folder.
+
+### Load Extension in Chrome
+
+1. Open Chrome and navigate to `chrome://extensions`
+2. Enable "Developer mode" (toggle in top-right)
+3. Click "Load unpacked"
+4. Select the `dist/` folder
+
+The extension will automatically reload when you make changes during development.
+
+### Build for Production
+
+```bash
+npm run build
 ```
-chromium-browser --disable-web-security --user-data-dir
-```
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+The production-ready extension will be in the `dist/` folder.
 
-## Code scaffolding
+## Usage
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+1. Click the extension icon to open My S3 Browser
+2. Add your AWS credentials:
+   - Click the credentials dropdown
+   - Select "Add New Credential"
+   - Enter your Access Key ID, Secret Access Key, and Region
+3. Select a bucket from the bucket dropdown
+4. Browse, upload, download, and manage your S3 files
 
-## Build
+## Security
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
+- Credentials are stored securely in Chrome's local storage
+- All S3 operations go directly from your browser to AWS
+- No data is sent to third-party servers
 
-## Running unit tests
+## Migration from Angular 4
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+This is a complete rebuild from Angular 4 to Vue 3:
+- Migrated from Manifest V2 to V3 (Chrome requirement)
+- Updated from AWS SDK v2 to v3
+- Modern TypeScript and build tooling
+- Improved UI with Bootstrap 5
 
-## Running end-to-end tests
+## License
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-Before running the tests make sure you are serving the app via `ng serve`.
+MIT
 
+## Contributing
+
+Issues and pull requests are welcome on [GitHub](https://github.com/shishirsharma/MyS3Browser).
