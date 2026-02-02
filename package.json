@@ -26,5 +26,13 @@
     "vite": "^5.0.10",
     "vue-tsc": "^1.8.27"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shishirsharma/MyS3Browser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shishirsharma/MyS3Browser/issues"
+  },
+  "homepage": "https://github.com/shishirsharma/MyS3Browser"
 }
