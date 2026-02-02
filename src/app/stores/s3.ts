@@ -116,6 +116,11 @@ export const useS3Store = defineStore('s3', () => {
     folders.value = folders.value.filter(f => f.prefix !== prefix);
   }
 
+  function getBucketRegion(bucketName: string): string | undefined {
+    const bucket = buckets.value.find(b => b.name === bucketName);
+    return bucket?.region;
+  }
+
   return {
     buckets,
     currentBucket,
@@ -144,5 +149,6 @@ export const useS3Store = defineStore('s3', () => {
     setSearchQuery,
     removeObject,
     removeFolder,
+    getBucketRegion,
   };
 });
