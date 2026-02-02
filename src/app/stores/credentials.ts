@@ -27,6 +27,20 @@ function convertOldCredential(old: OldCredential, index: number = 0): Credential
   };
 }
 
+/**
+ * Serialize credentials to plain JSON objects for storage
+ * This ensures we don't accidentally save Vue reactivity proxies
+ */
+function serializeCredentials(credentials: Credential[]): Credential[] {
+  return credentials.map(cred => ({
+    name: cred.name,
+    accessKeyId: cred.accessKeyId,
+    secretAccessKey: cred.secretAccessKey,
+    region: cred.region,
+    bucket: cred.bucket,
+  }));
+}
+
 export const useCredentialsStore = defineStore('credentials', () => {
   const credentials = ref<Credential[]>([]);
   const activeCredentialName = ref<string | null>(null);
@@ -46,22 +60,41 @@ export const useCredentialsStore = defineStore('credentials', () => {
     isLoading.value = true;
     error.value = null;
     try {
+      console.log('[Credentials] Loading credentials...');
       const result = await chrome.storage.local.get([STORAGE_KEY, ACTIVE_KEY]);
+      console.log('[Credentials] Chrome storage result:', result);
+
       let migratedCredentials: Credential[] = [];
       let needsMigration = false;
 
       // Check if we have data in the new format
       if (result[STORAGE_KEY]) {
+        console.log('[Credentials] Found data in new format:', result[STORAGE_KEY]);
         // Ensure it's an array - handle case where single object was stored
         if (Array.isArray(result[STORAGE_KEY])) {
           migratedCredentials = result[STORAGE_KEY];
-        } else {
-          // Single credential object stored - convert to array
-          console.warn('Found single credential object, converting to array');
-          migratedCredentials = [result[STORAGE_KEY] as Credential];
-          needsMigration = true;
+          console.log('[Credentials] Data is array with', migratedCredentials.length, 'credentials');
+        } else if (typeof result[STORAGE_KEY] === 'object' && result[STORAGE_KEY] !== null) {
+          // Check if it's a malformed nested object (like {"0": {"0": ...}})
+          const obj = result[STORAGE_KEY];
+          if ('0' in obj && typeof obj['0'] === 'object') {
+            console.error('[Credentials] Detected malformed nested object structure, clearing storage');
+            await chrome.storage.local.remove([STORAGE_KEY, ACTIVE_KEY]);
+            migratedCredentials = [];
+            needsMigration = false;
+          } else if ('name' in obj && 'accessKeyId' in obj) {
+            // Single credential object stored - convert to array
+            console.warn('[Credentials] Found single credential object, converting to array');
+            migratedCredentials = [result[STORAGE_KEY] as Credential];
+            needsMigration = true;
+          } else {
+            console.error('[Credentials] Unknown data format, clearing storage');
+            await chrome.storage.local.remove([STORAGE_KEY, ACTIVE_KEY]);
+            migratedCredentials = [];
+          }
         }
       } else {
+        console.log('[Credentials] No data in new format, checking old localStorage');
         // No data in new format, check for old localStorage data
         needsMigration = await migrateFromLocalStorage(migratedCredentials);
       }
@@ -71,7 +104,8 @@ export const useCredentialsStore = defineStore('credentials', () => {
 
       // Save migrated data if needed
       if (needsMigration && credentials.value.length > 0) {
-        await chrome.storage.local.set({ [STORAGE_KEY]: credentials.value });
+        const serialized = serializeCredentials(credentials.value);
+        await chrome.storage.local.set({ [STORAGE_KEY]: serialized });
         console.log('Migrated credentials to new format');
       }
 
@@ -157,20 +191,33 @@ export const useCredentialsStore = defineStore('credentials', () => {
   async function saveCredential(credential: Credential): Promise<void> {
     error.value = null;
     try {
+      console.log('[Credentials] Saving credential:', credential.name);
+
       // Ensure credentials is an array
       if (!Array.isArray(credentials.value)) {
-        console.error('credentials.value is not an array, resetting to empty array');
+        console.error('[Credentials] credentials.value is not an array, resetting to empty array');
         credentials.value = [];
       }
 
       const existingIndex = credentials.value.findIndex(c => c.name === credential.name);
       if (existingIndex >= 0) {
+        console.log('[Credentials] Updating existing credential at index', existingIndex);
         credentials.value[existingIndex] = credential;
       } else {
+        console.log('[Credentials] Adding new credential');
         credentials.value.push(credential);
       }
 
-      await chrome.storage.local.set({ [STORAGE_KEY]: credentials.value });
+      console.log('[Credentials] Saving to chrome.storage.local, total credentials:', credentials.value.length);
+      // Serialize to plain JSON objects before saving
+      const serialized = serializeCredentials(credentials.value);
+      console.log('[Credentials] Serialized credentials:', serialized);
+      await chrome.storage.local.set({ [STORAGE_KEY]: serialized });
+      console.log('[Credentials] Save successful');
+
+      // Verify the save
+      const verification = await chrome.storage.local.get([STORAGE_KEY]);
+      console.log('[Credentials] Verification read:', verification);
 
       // Set as active if it's the first credential
       if (credentials.value.length === 1) {
@@ -193,7 +240,8 @@ export const useCredentialsStore = defineStore('credentials', () => {
       }
 
       credentials.value = credentials.value.filter(c => c.name !== name);
-      await chrome.storage.local.set({ [STORAGE_KEY]: credentials.value });
+      const serialized = serializeCredentials(credentials.value);
+      await chrome.storage.local.set({ [STORAGE_KEY]: serialized });
 
       // If deleted the active credential, switch to another
       if (activeCredentialName.value === name) {

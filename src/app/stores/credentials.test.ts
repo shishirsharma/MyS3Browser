@@ -15,9 +15,14 @@ global.chrome = {
 } as any;
 
 describe('useCredentialsStore - Migration Logic', () => {
+  let saveSpy: any;
+
   beforeEach(() => {
     // Create a fresh pinia instance for each test
     setActivePinia(createPinia());
+
+    // Spy on chrome.storage.local.set to verify plain objects are saved
+    saveSpy = chrome.storage.local.set as any;
 
     // Clear all mocks
     vi.clearAllMocks();
@@ -313,6 +318,43 @@ describe('useCredentialsStore - Migration Logic', () => {
       expect(Array.isArray(store.credentials)).toBe(true);
       expect(store.credentials).toHaveLength(1);
       expect(store.credentials[0]).toEqual(newCred);
+    });
+  });
+
+  describe('Serialization', () => {
+    it('should save plain JSON objects, not Vue proxies', async () => {
+      const store = useCredentialsStore();
+
+      const newCred: Credential = {
+        name: 'Test',
+        accessKeyId: 'AKIATEST',
+        secretAccessKey: 'secret',
+        region: 'us-east-1',
+        bucket: 'test-bucket',
+      };
+
+      await store.saveCredential(newCred);
+
+      // Verify chrome.storage.local.set was called
+      expect(chrome.storage.local.set).toHaveBeenCalled();
+
+      // Get the data that was saved - check all calls that have mys3browser_credentials
+      const allCalls = (chrome.storage.local.set as any).mock.calls;
+      const relevantCall = allCalls.find((call: any) =>
+        call[0] && call[0].mys3browser_credentials
+      );
+
+      expect(relevantCall).toBeDefined();
+      const savedData = relevantCall[0].mys3browser_credentials;
+
+      // Verify it's a plain array of plain objects
+      expect(Array.isArray(savedData)).toBe(true);
+      expect(savedData).toHaveLength(1);
+      expect(savedData[0]).toEqual(newCred);
+
+      // Verify it's not a Vue Proxy (plain objects only have expected keys)
+      const objKeys = Object.keys(savedData[0]);
+      expect(objKeys.sort()).toEqual(['accessKeyId', 'bucket', 'name', 'region', 'secretAccessKey']);
     });
   });
 });
