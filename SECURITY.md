@@ -15,7 +15,7 @@ We take the security of My S3 Browser seriously. If you discover a security vuln
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-Instead, please report them via email to: **shishirsharma.in@gmail.com**
+Instead, please report them via email to: **shishirsharma [dot] in [at] gmail [dot] com**
 
 Include the following information:
 - Type of vulnerability

@@ -6,7 +6,7 @@ This project follows the [Contributor Covenant Code of Conduct version 2.1](http
 
 ## Enforcement
 
-Instances of unacceptable behavior may be reported to the project maintainer at shishirsharma.in@gmail.com. All complaints will be reviewed and investigated promptly and fairly.
+Instances of unacceptable behavior may be reported to the project maintainer at shishirsharma [dot] in [at] gmail [dot] com. All complaints will be reviewed and investigated promptly and fairly.
 
 ## Attribution
 
