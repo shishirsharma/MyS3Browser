@@ -199,13 +199,28 @@ watch(() => s3Store.currentBucket, async (newBucket) => {
 
 // Initial load
 onMounted(async () => {
+  // Wait for credentials to finish loading if they're still loading
+  if (credentialsStore.isLoading) {
+    // Wait for isLoading to become false
+    const unwatch = watch(() => credentialsStore.isLoading, async (loading) => {
+      if (!loading) {
+        unwatch();
+        await initializeDashboard();
+      }
+    });
+  } else {
+    await initializeDashboard();
+  }
+});
+
+async function initializeDashboard() {
   if (credentialsStore.activeCredential) {
     await loadBuckets();
   } else if (credentialsStore.credentials.length === 0) {
     // Show credential modal if no credentials saved
     showCredentialModal.value = true;
   }
-});
+}
 </script>
 
 <template>
