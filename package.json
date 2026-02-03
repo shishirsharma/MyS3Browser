@@ -23,11 +23,11 @@
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.0-beta.23",
     "@types/chrome": "^0.0.254",
-    "@vitejs/plugin-vue": "^4.5.2",
+    "@vitejs/plugin-vue": "^6.0.4",
     "@vitest/ui": "^4.0.18",
     "happy-dom": "^20.4.0",
     "typescript": "^5.3.3",
-    "vite": "^5.0.10",
+    "vite": "^7.3.1",
     "vitest": "^4.0.18",
     "vue-tsc": "^2.0.0"
   },
