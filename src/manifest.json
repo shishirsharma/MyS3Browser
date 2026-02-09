@@ -21,7 +21,6 @@
     "https://*.amazonaws.com/*"
   ],
   "permissions": [
-    "storage",
-    "tabs"
+    "storage"
   ]
 }
