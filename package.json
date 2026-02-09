@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && zip -r MyS3Browser-$(node -p \"require('./package.json').version\").zip dist/ -x 'dist/.vite/*'",
     "type-check": "vue-tsc --noEmit",
     "preview": "vite preview",
     "test": "vitest",
