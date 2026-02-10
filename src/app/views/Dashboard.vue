@@ -3,6 +3,8 @@ import { ref, watch, onMounted } from 'vue';
 import { useCredentialsStore } from '../stores/credentials';
 import { useS3Store } from '../stores/s3';
 import * as s3Service from '../services/s3';
+import { trackEvent, trackError } from '../services/analytics';
+import { getAnonymousBucketId, getAnonymousFileId, getAnonymousCredentialId } from '../services/anonymization';
 import Navbar from '../components/Navbar.vue';
 import Breadcrumbs from '../components/Breadcrumbs.vue';
 import FileList from '../components/FileList.vue';
@@ -44,6 +46,9 @@ async function loadBuckets() {
     const buckets = await s3Service.listBuckets(credentialsStore.activeCredential);
     s3Store.setBuckets(buckets);
 
+    // Track unique bucket count
+    trackEvent('s3_action', { action: 'list_buckets', bucket_count: buckets.length });
+
     // Auto-select default bucket or first bucket
     if (credentialsStore.activeCredential.bucket) {
       const defaultBucket = buckets.find(b => b.name === credentialsStore.activeCredential!.bucket);
@@ -59,6 +64,7 @@ async function loadBuckets() {
     const message = e instanceof Error ? e.message : 'Failed to load buckets';
     s3Store.setError(message);
     showAlert(message, 'danger');
+    trackError('Failed to load buckets', e instanceof Error ? e.stack : undefined);
   } finally {
     s3Store.setLoading(false);
   }
@@ -81,10 +87,20 @@ async function loadObjects(continuationToken?: string) {
     );
 
     s3Store.setListResult(result.folders, result.objects, result.nextToken);
+
+    const anonymousBucketId = await getAnonymousBucketId(s3Store.currentBucket);
+    trackEvent('s3_action', {
+      action: 'list_objects',
+      bucket_id: anonymousBucketId,
+      file_count: result.objects.length,
+      folder_count: result.folders.length,
+      has_pagination: !!result.nextToken
+    });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed to load objects';
     s3Store.setError(message);
     showAlert(message, 'danger');
+    trackError('Failed to load objects', e instanceof Error ? e.stack : undefined);
   } finally {
     s3Store.setLoading(false);
   }
@@ -92,11 +108,19 @@ async function loadObjects(continuationToken?: string) {
 
 async function navigateToFolder(prefix: string) {
   s3Store.setCurrentPrefix(prefix);
+  if (s3Store.currentBucket) {
+    const anonymousBucketId = await getAnonymousBucketId(s3Store.currentBucket);
+    trackEvent('s3_action', { action: 'navigate_folder', bucket_id: anonymousBucketId });
+  }
   await loadObjects();
 }
 
 async function navigateFromBreadcrumb(prefix: string) {
   s3Store.setCurrentPrefix(prefix);
+  if (s3Store.currentBucket) {
+    const anonymousBucketId = await getAnonymousBucketId(s3Store.currentBucket);
+    trackEvent('s3_action', { action: 'navigate_breadcrumb', bucket_id: anonymousBucketId });
+  }
   await loadObjects();
 }
 
@@ -111,9 +135,13 @@ async function downloadFile(key: string) {
       key,
       bucketRegion
     );
+    const anonymousBucketId = await getAnonymousBucketId(s3Store.currentBucket);
+    const anonymousFileId = await getAnonymousFileId(key);
+    trackEvent('s3_action', { action: 'download_file', bucket_id: anonymousBucketId, file_id: anonymousFileId });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed to download file';
     showAlert(message, 'danger');
+    trackError('Failed to download file', e instanceof Error ? e.stack : undefined);
   }
 }
 
@@ -130,9 +158,13 @@ async function deleteFile(key: string) {
     );
     s3Store.removeObject(key);
     showAlert('File deleted successfully', 'success');
+    const anonymousBucketId = await getAnonymousBucketId(s3Store.currentBucket);
+    const anonymousFileId = await getAnonymousFileId(key);
+    trackEvent('s3_action', { action: 'delete_file', bucket_id: anonymousBucketId, file_id: anonymousFileId });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed to delete file';
     showAlert(message, 'danger');
+    trackError('Failed to delete file', e instanceof Error ? e.stack : undefined);
   }
 }
 
@@ -149,20 +181,25 @@ async function deleteFolder(prefix: string) {
     );
     s3Store.removeFolder(prefix);
     showAlert('Folder deleted successfully', 'success');
+    const anonymousBucketId = await getAnonymousBucketId(s3Store.currentBucket);
+    trackEvent('s3_action', { action: 'delete_folder', bucket_id: anonymousBucketId });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed to delete folder';
     showAlert(message, 'danger');
+    trackError('Failed to delete folder', e instanceof Error ? e.stack : undefined);
   }
 }
 
 async function nextPage() {
   if (!s3Store.nextToken) return;
   s3Store.pushPrevToken(s3Store.nextToken);
+  trackEvent('s3_action', { action: 'pagination_next' });
   await loadObjects(s3Store.nextToken);
 }
 
 async function prevPage() {
   const token = s3Store.popPrevToken();
+  trackEvent('s3_action', { action: 'pagination_prev' });
   if (token === '') {
     await loadObjects();
   } else {
@@ -172,16 +209,21 @@ async function prevPage() {
 
 function onSearch(query: string) {
   s3Store.setSearchQuery(query);
+  // Track search without the query content (privacy)
+  trackEvent('search', { query_length: query.length });
 }
 
 function openAddCredentialModal() {
   editingCredential.value = null;
   showCredentialModal.value = true;
+  trackEvent('credential_action', { action: 'open_add_modal' });
 }
 
-function openEditCredentialModal(credential: Credential) {
+async function openEditCredentialModal(credential: Credential) {
   editingCredential.value = credential;
   showCredentialModal.value = true;
+  const anonCredentialId = await getAnonymousCredentialId(credential.name);
+  trackEvent('credential_action', { action: 'open_edit_modal', credential_id: anonCredentialId });
 }
 
 function closeCredentialModal() {
@@ -190,18 +232,28 @@ function closeCredentialModal() {
 }
 
 async function onCredentialSaved() {
+  const isNewCredential = !editingCredential.value;
   await loadBuckets();
   showAlert('Credential saved successfully', 'success');
+  trackEvent('credential_action', { action: isNewCredential ? 'added' : 'updated' });
 }
 
 async function onFileUploaded() {
   await loadObjects();
   showAlert('File uploaded successfully', 'success');
+  if (s3Store.currentBucket) {
+    const anonymousBucketId = await getAnonymousBucketId(s3Store.currentBucket);
+    trackEvent('s3_action', { action: 'file_uploaded', bucket_id: anonymousBucketId });
+  }
 }
 
 async function onFolderCreated() {
   await loadObjects();
   showAlert('Folder created successfully', 'success');
+  if (s3Store.currentBucket) {
+    const anonymousBucketId = await getAnonymousBucketId(s3Store.currentBucket);
+    trackEvent('s3_action', { action: 'folder_created', bucket_id: anonymousBucketId });
+  }
 }
 
 // Watch for credential changes
@@ -252,11 +304,11 @@ async function initializeDashboard() {
   <div class="d-flex flex-column h-100">
     <Navbar
       @search="onSearch"
-      @show-help="showHelpModal = true"
+      @show-help="() => { trackEvent('ui_action', { action: 'open_help_modal' }); showHelpModal = true; }"
       @show-credential-modal="openAddCredentialModal"
       @edit-credential-modal="openEditCredentialModal"
-      @show-upload-modal="showUploadModal = true"
-      @show-create-folder-modal="showCreateFolderModal = true"
+      @show-upload-modal="() => { trackEvent('ui_action', { action: 'open_upload_modal' }); showUploadModal = true; }"
+      @show-create-folder-modal="() => { trackEvent('ui_action', { action: 'open_create_folder_modal' }); showCreateFolderModal = true; }"
     />
 
     <!-- Alert -->
