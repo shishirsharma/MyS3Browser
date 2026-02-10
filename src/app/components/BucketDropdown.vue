@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useS3Store } from '../stores/s3';
+import { trackEvent } from '../services/analytics';
+import { getAnonymousBucketId } from '../services/anonymization';
 
 const s3Store = useS3Store();
 
@@ -8,8 +10,10 @@ const currentBucketName = computed(() => {
   return s3Store.currentBucket || 'Select Bucket';
 });
 
-function selectBucket(bucketName: string) {
+async function selectBucket(bucketName: string) {
   s3Store.setCurrentBucket(bucketName);
+  const anonymousBucketId = await getAnonymousBucketId(bucketName);
+  trackEvent('s3_action', { action: 'bucket_selected', bucket_id: anonymousBucketId });
 }
 </script>
 

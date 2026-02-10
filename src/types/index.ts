@@ -31,3 +31,11 @@ export interface BucketInfo {
   creationDate?: Date;
   region?: string;
 }
+
+// Google Analytics types
+declare global {
+  interface Window {
+    dataLayer: any[];
+    gtag: (...args: any[]) => void;
+  }
+}

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useCredentialsStore } from '../stores/credentials';
+import { trackEvent } from '../services/analytics';
+import { getAnonymousCredentialId } from '../services/anonymization';
 import type { Credential } from '@/types';
 
 const emit = defineEmits<{
@@ -16,6 +18,8 @@ const currentCredentialName = computed(() => {
 
 async function selectCredential(name: string) {
   await credentialsStore.setActiveCredential(name);
+  await getAnonymousCredentialId(name); // Register credential ID
+  trackEvent('credential_action', { action: 'selected' });
 }
 
 function editCredential(event: Event, credential: Credential) {
@@ -29,6 +33,7 @@ async function deleteCredential(event: Event, name: string) {
   if (confirm(`Are you sure you want to delete the credential "${name}"?`)) {
     try {
       await credentialsStore.deleteCredential(name);
+      trackEvent('credential_action', { action: 'deleted' });
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Failed to delete credential');
     }
