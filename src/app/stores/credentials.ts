@@ -38,6 +38,7 @@ function serializeCredentials(credentials: Credential[]): Credential[] {
     secretAccessKey: cred.secretAccessKey,
     region: cred.region,
     bucket: cred.bucket,
+    endpoint: cred.endpoint,
   }));
 }
 

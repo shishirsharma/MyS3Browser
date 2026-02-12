@@ -22,24 +22,38 @@ function formatBytes(bytes: number): string {
 
 export function initializeClient(credential: Credential, region?: string): S3Client {
   const clientRegion = region || credential.region;
-  s3Client = new S3Client({
+  const config: any = {
     region: clientRegion,
     credentials: {
       accessKeyId: credential.accessKeyId,
       secretAccessKey: credential.secretAccessKey,
     },
-  });
+  };
+
+  if (credential.endpoint) {
+    config.endpoint = credential.endpoint;
+    config.forcePathStyle = true; // Required for MinIO, S3Mock, etc.
+  }
+
+  s3Client = new S3Client(config);
   return s3Client;
 }
 
 function createClientForRegion(credential: Credential, region: string): S3Client {
-  return new S3Client({
+  const config: any = {
     region,
     credentials: {
       accessKeyId: credential.accessKeyId,
       secretAccessKey: credential.secretAccessKey,
     },
-  });
+  };
+
+  if (credential.endpoint) {
+    config.endpoint = credential.endpoint;
+    config.forcePathStyle = true;
+  }
+
+  return new S3Client(config);
 }
 
 export function getClient(): S3Client | null {

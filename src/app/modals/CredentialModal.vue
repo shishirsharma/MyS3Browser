@@ -20,6 +20,7 @@ const accessKeyId = ref('');
 const secretAccessKey = ref('');
 const region = ref('us-east-1');
 const bucket = ref('');
+const endpoint = ref('');
 const error = ref<string | null>(null);
 const isSaving = ref(false);
 
@@ -58,6 +59,7 @@ watch(() => props.show, (newVal) => {
       secretAccessKey.value = props.editCredential.secretAccessKey;
       region.value = props.editCredential.region;
       bucket.value = props.editCredential.bucket;
+      endpoint.value = props.editCredential.endpoint || '';
     } else {
       resetForm();
     }
@@ -71,6 +73,7 @@ function resetForm() {
   secretAccessKey.value = '';
   region.value = 'us-east-1';
   bucket.value = '';
+  endpoint.value = '';
   error.value = null;
 }
 
@@ -95,6 +98,15 @@ async function onSubmit() {
     return;
   }
 
+  // Validate endpoint URL format if provided
+  if (endpoint.value.trim()) {
+    const endpointValue = endpoint.value.trim();
+    if (!endpointValue.startsWith('http://') && !endpointValue.startsWith('https://')) {
+      error.value = 'Endpoint URL must start with http:// or https://';
+      return;
+    }
+  }
+
   // Check for duplicate name (only when adding new)
   if (!isEditing.value && credentialsStore.getCredentialByName(name.value.trim())) {
     error.value = 'A credential with this name already exists';
@@ -110,6 +122,7 @@ async function onSubmit() {
       secretAccessKey: secretAccessKey.value.trim(),
       region: region.value.trim(),
       bucket: bucket.value.trim(),
+      endpoint: endpoint.value.trim() || undefined,
     };
 
     await credentialsStore.saveCredential(credential);
@@ -200,6 +213,24 @@ function onClose() {
                 placeholder="my-bucket-name"
               />
               <div class="form-text">Will be selected automatically when switching to this credential</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Custom Endpoint URL (optional)</label>
+              <input
+                v-model="endpoint"
+                type="text"
+                class="form-control"
+                placeholder="https://s3.wasabisys.com"
+              />
+              <div class="form-text">
+                Leave blank for AWS S3. For S3-compatible services, enter the endpoint URL:
+                <br>
+                <small class="text-muted">
+                  Examples: Wasabi (https://s3.wasabisys.com), MinIO (http://localhost:9000),
+                  DigitalOcean Spaces (https://nyc3.digitaloceanspaces.com)
+                </small>
+              </div>
             </div>
           </div>
           <div class="modal-footer">

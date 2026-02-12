@@ -354,7 +354,7 @@ describe('useCredentialsStore - Migration Logic', () => {
 
       // Verify it's not a Vue Proxy (plain objects only have expected keys)
       const objKeys = Object.keys(savedData[0]);
-      expect(objKeys.sort()).toEqual(['accessKeyId', 'bucket', 'name', 'region', 'secretAccessKey']);
+      expect(objKeys.sort()).toEqual(['accessKeyId', 'bucket', 'endpoint', 'name', 'region', 'secretAccessKey']);
     });
   });
 });
