@@ -30,13 +30,23 @@ function onDelete() {
     <td class="text-muted">-</td>
     <td class="text-muted">-</td>
     <td @click.stop>
-      <button
-        class="btn btn-outline-danger btn-sm"
-        title="Delete Folder"
-        @click="onDelete"
-      >
-        <i class="bi bi-trash"></i>
-      </button>
+      <div class="btn-group btn-group-sm">
+        <button
+          class="btn btn-outline-primary"
+          title="Download"
+          disabled
+          style="visibility: hidden;"
+        >
+          <i class="bi bi-download"></i>
+        </button>
+        <button
+          class="btn btn-outline-danger"
+          title="Delete Folder"
+          @click="onDelete"
+        >
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
     </td>
   </tr>
 </template>
