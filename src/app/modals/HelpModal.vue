@@ -122,7 +122,7 @@ function setActiveTab(tab: string) {
                 <div class="col-md-6">
                   <ul>
                     <li>Multiple AWS credential profiles</li>
-                    <li>S3-compatible service support</li>
+                    <li>Custom endpoint URLs for S3-compatible services</li>
                     <li>Browse S3 buckets and folders</li>
                     <li>Upload files to any location</li>
                     <li>Create new folders</li>
