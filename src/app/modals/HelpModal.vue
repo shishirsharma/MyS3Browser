@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref } from 'vue';
+
 defineProps<{
   show: boolean;
 }>();
@@ -8,9 +10,14 @@ const emit = defineEmits<{
 }>();
 
 const version = '0.2.1';
+const activeTab = ref('about');
 
 function onClose() {
   emit('close');
+}
+
+function setActiveTab(tab: string) {
+  activeTab.value = tab;
 }
 </script>
 
@@ -32,69 +39,132 @@ function onClose() {
           <button type="button" class="btn-close" @click="onClose"></button>
         </div>
         <div class="modal-body">
-          <div class="text-center mb-4">
-            <i class="bi bi-cloud display-1 text-primary"></i>
-            <h4 class="mt-2">My S3 Browser</h4>
-            <p class="text-muted">Version {{ version }}</p>
-          </div>
+          <!-- Tabs Navigation -->
+          <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                :class="{ active: activeTab === 'about' }"
+                @click="setActiveTab('about')"
+                type="button"
+              >
+                <i class="bi bi-info-circle me-1"></i>
+                About
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                :class="{ active: activeTab === 'getting-started' }"
+                @click="setActiveTab('getting-started')"
+                type="button"
+              >
+                <i class="bi bi-rocket me-1"></i>
+                Getting Started
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                :class="{ active: activeTab === 'features' }"
+                @click="setActiveTab('features')"
+                type="button"
+              >
+                <i class="bi bi-keyboard me-1"></i>
+                Features
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                :class="{ active: activeTab === 'security' }"
+                @click="setActiveTab('security')"
+                type="button"
+              >
+                <i class="bi bi-shield-check me-1"></i>
+                Security & Links
+              </button>
+            </li>
+          </ul>
 
-          <div class="mb-4">
-            <h6><i class="bi bi-info-circle me-2"></i>About</h6>
-            <p class="small text-muted">
-              My S3 Browser is a Chrome extension that allows you to browse, upload, and manage
-              files in your Amazon S3 buckets directly from your browser.
-            </p>
-          </div>
+          <!-- Tabs Content -->
+          <div class="tab-content">
+            <!-- About Tab -->
+            <div v-show="activeTab === 'about'" class="tab-pane fade" :class="{ 'show active': activeTab === 'about' }">
+              <div class="text-center mb-4">
+                <i class="bi bi-cloud display-1 text-primary"></i>
+                <h4 class="mt-2">My S3 Browser</h4>
+                <p class="text-muted">Version {{ version }}</p>
+              </div>
+              <p class="text-muted">
+                My S3 Browser is a Chrome extension that allows you to browse, upload, and manage
+                files in your Amazon S3 buckets and S3-compatible services (Wasabi, MinIO, DigitalOcean Spaces)
+                directly from your browser.
+              </p>
+            </div>
 
-          <div class="mb-4">
-            <h6><i class="bi bi-rocket me-2"></i>Getting Started</h6>
-            <ol class="small">
-              <li>Add your AWS credentials using the credential dropdown in the navbar</li>
-              <li>Select a bucket from the bucket dropdown</li>
-              <li>Browse folders and files in your bucket</li>
-              <li>Upload files, create folders, and download or delete files as needed</li>
-            </ol>
-          </div>
+            <!-- Getting Started Tab -->
+            <div v-show="activeTab === 'getting-started'" class="tab-pane fade" :class="{ 'show active': activeTab === 'getting-started' }">
+              <h6 class="mb-3">Quick Start Guide</h6>
+              <ol>
+                <li class="mb-2">Add your AWS credentials using the credential dropdown in the navbar</li>
+                <li class="mb-2">Optionally specify a custom endpoint URL for S3-compatible services</li>
+                <li class="mb-2">Select a bucket from the bucket dropdown</li>
+                <li class="mb-2">Browse folders and files in your bucket</li>
+                <li class="mb-2">Upload files, create folders, and download or delete files as needed</li>
+              </ol>
+            </div>
 
-          <div class="mb-4">
-            <h6><i class="bi bi-keyboard me-2"></i>Features</h6>
-            <ul class="small">
-              <li>Multiple AWS credential profiles</li>
-              <li>Browse S3 buckets and folders</li>
-              <li>Upload files to any location</li>
-              <li>Create new folders</li>
-              <li>Download files with pre-signed URLs</li>
-              <li>Delete files and folders</li>
-              <li>Search within current folder</li>
-              <li>Pagination for large folders</li>
-            </ul>
-          </div>
+            <!-- Features Tab -->
+            <div v-show="activeTab === 'features'" class="tab-pane fade" :class="{ 'show active': activeTab === 'features' }">
+              <h6 class="mb-3">Key Features</h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <ul>
+                    <li>Multiple AWS credential profiles</li>
+                    <li>S3-compatible service support</li>
+                    <li>Browse S3 buckets and folders</li>
+                    <li>Upload files to any location</li>
+                    <li>Create new folders</li>
+                  </ul>
+                </div>
+                <div class="col-md-6">
+                  <ul>
+                    <li>Download files with pre-signed URLs</li>
+                    <li>Delete files and folders</li>
+                    <li>Search within current folder</li>
+                    <li>Pagination for large folders</li>
+                    <li>Privacy-first analytics</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
 
-          <div class="mb-4">
-            <h6><i class="bi bi-shield-check me-2"></i>Security</h6>
-            <p class="small text-muted">
-              Your AWS credentials are stored locally in Chrome's secure storage.
-              All S3 operations are performed directly between your browser and AWS.
-              No data is sent to any third-party servers.
-            </p>
-          </div>
+            <!-- Security & Links Tab -->
+            <div v-show="activeTab === 'security'" class="tab-pane fade" :class="{ 'show active': activeTab === 'security' }">
+              <h6 class="mb-3"><i class="bi bi-shield-check me-2"></i>Security</h6>
+              <p class="text-muted mb-4">
+                Your AWS credentials are stored locally in Chrome's secure storage.
+                All S3 operations are performed directly between your browser and AWS.
+                No data is sent to any third-party servers.
+              </p>
 
-          <div>
-            <h6><i class="bi bi-link-45deg me-2"></i>Links</h6>
-            <ul class="list-unstyled small">
-              <li>
-                <a href="https://github.com/shishirsharma/MyS3Browser" target="_blank">
-                  <i class="bi bi-github me-1"></i>
-                  GitHub Repository
-                </a>
-              </li>
-              <li>
-                <a href="https://github.com/shishirsharma/MyS3Browser/issues" target="_blank">
-                  <i class="bi bi-bug me-1"></i>
-                  Report an Issue
-                </a>
-              </li>
-            </ul>
+              <h6 class="mb-3"><i class="bi bi-link-45deg me-2"></i>Links</h6>
+              <ul class="list-unstyled">
+                <li class="mb-2">
+                  <a href="https://github.com/shishirsharma/MyS3Browser" target="_blank">
+                    <i class="bi bi-github me-1"></i>
+                    GitHub Repository
+                  </a>
+                </li>
+                <li class="mb-2">
+                  <a href="https://github.com/shishirsharma/MyS3Browser/issues" target="_blank">
+                    <i class="bi bi-bug me-1"></i>
+                    Report an Issue
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
