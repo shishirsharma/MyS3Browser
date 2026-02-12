@@ -4,6 +4,7 @@ export interface Credential {
   secretAccessKey: string;
   region: string;
   bucket: string;
+  endpoint?: string;
 }
 
 export interface S3Object {
