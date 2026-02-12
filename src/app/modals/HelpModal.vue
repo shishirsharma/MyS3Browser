@@ -7,7 +7,7 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const version = '0.2.0';
+const version = '0.2.1';
 
 function onClose() {
   emit('close');
@@ -22,7 +22,7 @@ function onClose() {
     tabindex="-1"
     @click.self="onClose"
   >
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">
