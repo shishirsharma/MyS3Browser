@@ -4,25 +4,21 @@ import { useCredentialsStore } from './credentials';
 import type { Credential } from '@/types';
 
 // Mock chrome API
-global.chrome = {
+// @ts-ignore - chrome API is mocked for testing
+globalThis.chrome = {
   storage: {
     local: {
       get: vi.fn(),
       set: vi.fn(),
       remove: vi.fn(),
-    },
-  },
+    } as any,
+  } as any,
 } as any;
 
 describe('useCredentialsStore - Migration Logic', () => {
-  let saveSpy: any;
-
   beforeEach(() => {
     // Create a fresh pinia instance for each test
     setActivePinia(createPinia());
-
-    // Spy on chrome.storage.local.set to verify plain objects are saved
-    saveSpy = chrome.storage.local.set as any;
 
     // Clear all mocks
     vi.clearAllMocks();
@@ -218,14 +214,6 @@ describe('useCredentialsStore - Migration Logic', () => {
         s3_region: 'us-east-1',
         s3_bucket: 'my-bucket',
         name: 'Shared',
-      };
-
-      const additionalCredential = {
-        access_key_id: 'AKIATEST2',
-        secret_access_key: 'secret2',
-        s3_region: 'us-west-2',
-        s3_bucket: 'other-bucket',
-        name: 'Additional',
       };
 
       // Same credential in both places (duplicate scenario)
