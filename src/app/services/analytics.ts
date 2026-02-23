@@ -1,50 +1,48 @@
 /**
- * Google Analytics service for Chrome extension
- * This service handles event tracking for the My S3 Browser extension
+ * Google Analytics service for Chrome extension (Measurement Protocol)
+ * This service handles event tracking via the background service worker
+ * Privacy-friendly: no remote scripts loaded, only API calls
  */
 
-const GA_MEASUREMENT_ID = 'G-Z67KC80X9V';
+// Generate or retrieve a session ID for this extension session
+function getSessionId() {
+  let sessionId = sessionStorage.getItem('ga_session_id');
+  if (!sessionId) {
+    sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    sessionStorage.setItem('ga_session_id', sessionId);
+  }
+  return sessionId;
+}
+
+// Send event to Google Analytics via background service worker
+function sendToGA(eventName: string, eventParams: Record<string, any> = {}) {
+  chrome.runtime.sendMessage({
+    type: 'ANALYTICS_EVENT',
+    eventName: eventName,
+    eventParams: {
+      session_id: getSessionId(),
+      engagement_time_msec: '100',
+      ...eventParams
+    }
+  }).catch(error => {
+    // Silently fail - don't disrupt the app if analytics fails
+    console.debug('[Analytics] Failed to send message to background:', error);
+  });
+}
 
 /**
  * Initialize Google Analytics
+ * No-op now, kept for compatibility
  */
 export function initializeAnalytics() {
-  if (!GA_MEASUREMENT_ID || GA_MEASUREMENT_ID === 'G-YOUR_MEASUREMENT_ID') {
-    console.warn('Google Analytics not configured. Please set GA_MEASUREMENT_ID');
-    return;
-  }
-
-  // Load the Google Analytics script
-  const script = document.createElement('script');
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-  document.head.appendChild(script);
-
-  // Initialize gtag
-  window.dataLayer = window.dataLayer || [];
-  function gtag(...args: any[]) {
-    window.dataLayer.push(arguments);
-  }
-  gtag('js', new Date());
-  gtag('config', GA_MEASUREMENT_ID, {
-    'send_page_view': false, // We'll manually send page views
-    'allow_google_signals': false,
-    'allow_ad_personalization_signals': false
-  });
-
-  (window as any).gtag = gtag;
+  console.debug('[Analytics] Initialized with Measurement Protocol');
 }
 
 /**
  * Track a page view
  */
 export function trackPageView(pagePath: string, pageTitle?: string) {
-  if (!(window as any).gtag) {
-    console.warn('Google Analytics not initialized');
-    return;
-  }
-
-  (window as any).gtag('event', 'page_view', {
+  sendToGA('page_view', {
     page_path: pagePath,
     page_title: pageTitle || document.title,
   });
@@ -54,12 +52,7 @@ export function trackPageView(pagePath: string, pageTitle?: string) {
  * Track a custom event
  */
 export function trackEvent(eventName: string, eventData?: Record<string, any>) {
-  if (!(window as any).gtag) {
-    console.warn('Google Analytics not initialized');
-    return;
-  }
-
-  (window as any).gtag('event', eventName, eventData || {});
+  sendToGA(eventName, eventData || {});
 }
 
 /**

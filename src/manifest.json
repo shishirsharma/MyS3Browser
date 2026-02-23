@@ -19,8 +19,7 @@
   },
   "host_permissions": [
     "https://*.amazonaws.com/*",
-    "https://*.googleapis.com/*",
-    "https://www.googletagmanager.com/*"
+    "https://*.googleapis.com/*"
   ],
   "permissions": [
     "storage"
