@@ -10,8 +10,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "launch-extension": "node scripts/launch-extension.js",
-    "screenshots": "node scripts/screenshot.js"
+    "capture-screenshots": "node scripts/screenshot.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.450.0",

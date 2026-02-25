@@ -219,47 +219,69 @@ async function takeScreenshots() {
     if (credentials) {
       console.log('🔐 Adding credentials to extension...');
       try {
-        // Click the credential dropdown to add new credential
-        const addBtn = await page.$('button[title*="credential"], button:has-text("Add"), .btn-primary');
-        if (addBtn) {
-          await addBtn.click();
-          await delay(500);
+        // Find and click the button to add/edit credential
+        await page.evaluate(() => {
+          // Look for button with text containing "add" or icon
+          const buttons = Array.from(document.querySelectorAll('button'));
+          const addBtn = buttons.find(b =>
+            b.textContent.toLowerCase().includes('add') ||
+            b.textContent.toLowerCase().includes('credential') ||
+            b.title?.toLowerCase().includes('add') ||
+            b.querySelector('i.bi-plus')
+          );
+          if (addBtn) addBtn.click();
+        });
 
-          // Fill in the form
-          const accessKeyInput = await page.$('input[placeholder*="Access"], input[placeholder*="access"]');
-          const secretKeyInput = await page.$('input[placeholder*="Secret"], input[placeholder*="secret"]');
-          const regionInput = await page.$('input[placeholder*="Region"], input[placeholder*="region"]');
-          const bucketInput = await page.$('input[placeholder*="Bucket"], input[placeholder*="bucket"]');
+        await delay(800);
 
-          if (accessKeyInput) {
-            await accessKeyInput.type(credentials.aws_access_key_id, { delay: 50 });
-            console.log('   ✓ Access Key filled');
-          }
-          if (secretKeyInput) {
-            await secretKeyInput.type(credentials.aws_secret_access_key, { delay: 50 });
-            console.log('   ✓ Secret Key filled');
-          }
-          if (regionInput && credentials.region) {
-            await regionInput.type(credentials.region, { delay: 50 });
-            console.log('   ✓ Region filled');
-          }
-          if (bucketInput && credentials.bucket) {
-            await bucketInput.type(credentials.bucket, { delay: 50 });
-            console.log('   ✓ Bucket filled');
-          } else if (bucketInput && !credentials.bucket) {
-            console.log('   ℹ️  Bucket not set (optional - will show bucket selector)');
-          }
+        // Fill in credentials using evaluate to find inputs
+        const filled = await page.evaluate((creds) => {
+          const inputs = Array.from(document.querySelectorAll('input[type="text"], input[type="password"]'));
+          let filled = 0;
 
-          // Save credentials
-          const saveBtn = await page.$('button:has-text("Save"), button.btn-primary');
-          if (saveBtn) {
-            await saveBtn.click();
-            await delay(2000);
-            console.log('✅ Credentials added successfully');
+          // Find and fill each input
+          for (const input of inputs) {
+            const placeholder = input.placeholder?.toLowerCase() || '';
+            const label = input.parentElement?.textContent?.toLowerCase() || '';
+
+            if ((placeholder.includes('access') || label.includes('access')) && !input.value) {
+              input.value = creds.aws_access_key_id;
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              filled++;
+            } else if ((placeholder.includes('secret') || label.includes('secret')) && !input.value) {
+              input.value = creds.aws_secret_access_key;
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              filled++;
+            } else if ((placeholder.includes('region') || label.includes('region')) && creds.region && !input.value) {
+              input.value = creds.region;
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              filled++;
+            } else if ((placeholder.includes('bucket') || label.includes('bucket')) && creds.bucket && !input.value) {
+              input.value = creds.bucket;
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              filled++;
+            }
           }
-        }
+          return filled;
+        }, credentials);
+
+        console.log(`   ✓ Filled ${filled} credential fields`);
+
+        // Click save button
+        await page.evaluate(() => {
+          const buttons = Array.from(document.querySelectorAll('button'));
+          const saveBtn = buttons.find(b =>
+            b.textContent.toLowerCase().includes('save') ||
+            b.textContent.toLowerCase().includes('ok')
+          );
+          if (saveBtn) saveBtn.click();
+        });
+
+        await delay(2000);
+        console.log('✅ Credentials added successfully');
       } catch (e) {
         console.log('⚠️  Could not auto-add credentials:', e.message);
+        console.log('   Credentials loaded but manual entry needed');
       }
     }
 
