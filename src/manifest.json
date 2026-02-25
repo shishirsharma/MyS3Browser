@@ -18,8 +18,7 @@
     "type": "module"
   },
   "host_permissions": [
-    "https://*.amazonaws.com/*",
-    "https://*.googleapis.com/*"
+    "https://*.amazonaws.com/*"
   ],
   "permissions": [
     "storage"
