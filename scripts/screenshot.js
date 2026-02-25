@@ -13,10 +13,12 @@
  *   3. Save to /screenshots folder
  */
 
-const puppeteer = require('puppeteer');
-const path = require('path');
-const fs = require('fs');
-const { spawn } = require('child_process');
+import puppeteer from 'puppeteer';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const EXTENSION_PATH = path.resolve(__dirname, '../dist');
 const OUTPUT_DIR = path.resolve(__dirname, '../screenshots');
@@ -26,10 +28,13 @@ if (!fs.existsSync(OUTPUT_DIR)) {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 }
 
+// Helper function to replace deprecated waitForTimeout
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function findExtensionId(page) {
   try {
     await page.goto('chrome://extensions/', { waitUntil: 'networkidle2' });
-    await page.waitForTimeout(1000);
+    await delay(1000);
 
     // Try to find extension ID from page
     const extensionIds = await page.evaluate(() => {
@@ -66,10 +71,15 @@ async function takeScreenshots() {
     await page.setViewport({ width: 1280, height: 800 });
 
     console.log('⏳ Waiting for Chrome to load extension...');
-    await page.waitForTimeout(3000);
+    await delay(3000);
 
-    // Find extension ID
-    let extensionId = await findExtensionId(page);
+    // Find extension ID - check for command line argument first
+    let extensionId = process.argv[2];
+
+    if (!extensionId) {
+      console.log('\n⏳ Attempting to auto-detect extension ID...');
+      extensionId = await findExtensionId(page);
+    }
 
     if (!extensionId) {
       console.log('\n⚠️  Could not auto-detect extension ID');
@@ -86,7 +96,13 @@ async function takeScreenshots() {
     }
 
     if (!extensionId) {
-      throw new Error('Could not find extension ID. Manual capture required.');
+      console.error('\n❌ Error: Could not find extension ID');
+      console.log('\n💡 To provide the extension ID manually:');
+      console.log('   1. Go to chrome://extensions/');
+      console.log('   2. Find your extension ID (e.g., "abc123def456...")');
+      console.log('   3. Run: npm run screenshots -- <EXTENSION_ID>');
+      console.log('\n   Example: npm run screenshots -- gcaipbplcgiomkpkhimfbdbjgofcbkpf');
+      throw new Error('Extension ID required');
     }
 
     console.log(`✅ Found extension ID: ${extensionId}\n`);
@@ -95,7 +111,7 @@ async function takeScreenshots() {
 
     console.log('📍 Navigating to extension popup...');
     await page.goto(extensionUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(2000);
+    await delay(2000);
 
     // Screenshot 1: Main browser view (no credentials state)
     console.log('📸 Capturing: Main browser (no credentials)...');
@@ -110,14 +126,15 @@ async function takeScreenshots() {
       const helpBtn = await page.$('button[title*="Help"]');
       if (helpBtn) {
         await helpBtn.click();
-        await page.waitForTimeout(800);
+        await delay(1000);
 
-        // Click on Features tab
-        const featuresTab = await page.$('button:has-text("Features")');
-        if (featuresTab) {
-          await featuresTab.click();
-          await page.waitForTimeout(500);
-        }
+        // Click on Features tab - find by content using evaluateHandle
+        await page.evaluate(() => {
+          const buttons = Array.from(document.querySelectorAll('.nav-link'));
+          const featuresBtn = buttons.find(btn => btn.textContent.includes('Features'));
+          if (featuresBtn) featuresBtn.click();
+        });
+        await delay(500);
 
         await page.screenshot({
           path: path.join(OUTPUT_DIR, '2-help-features.png'),
@@ -127,7 +144,7 @@ async function takeScreenshots() {
         // Close modal
         const closeBtn = await page.$('.btn-close');
         if (closeBtn) await closeBtn.click();
-        await page.waitForTimeout(500);
+        await delay(500);
       }
     } catch (e) {
       console.log('   ⚠️  Could not capture help modal:', e.message);
@@ -139,13 +156,15 @@ async function takeScreenshots() {
       const helpBtn = await page.$('button[title*="Help"]');
       if (helpBtn) {
         await helpBtn.click();
-        await page.waitForTimeout(800);
+        await delay(1000);
 
-        const gettingStartedTab = await page.$('button:has-text("Getting Started")');
-        if (gettingStartedTab) {
-          await gettingStartedTab.click();
-          await page.waitForTimeout(500);
-        }
+        // Click on Getting Started tab
+        await page.evaluate(() => {
+          const buttons = Array.from(document.querySelectorAll('.nav-link'));
+          const gettingStartedBtn = buttons.find(btn => btn.textContent.includes('Getting Started'));
+          if (gettingStartedBtn) gettingStartedBtn.click();
+        });
+        await delay(500);
 
         await page.screenshot({
           path: path.join(OUTPUT_DIR, '3-help-getting-started.png'),
@@ -187,7 +206,9 @@ async function takeScreenshots() {
 }
 
 // Run the script
-takeScreenshots().catch(err => {
+try {
+  await takeScreenshots();
+} catch (err) {
   console.error('Fatal error:', err);
   process.exit(1);
-});
+}
