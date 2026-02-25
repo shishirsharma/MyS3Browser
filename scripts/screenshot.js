@@ -53,7 +53,7 @@ async function takeScreenshots() {
   console.log('📋 Setup:');
   console.log('   ✓ Extension path:', EXTENSION_PATH);
   console.log('   ✓ Output directory:', OUTPUT_DIR);
-  console.log('   ✓ Viewport size: 1280x800\n');
+  console.log('   ✓ Viewport size: 1280x1200\n');
 
   let browser;
   let isExistingBrowser = false;
@@ -103,7 +103,7 @@ async function takeScreenshots() {
 
   try {
     const page = await browser.newPage();
-    await page.setViewport({ width: 1280, height: 800 });
+    await page.setViewport({ width: 1280, height: 1200 });
 
     console.log('⏳ Waiting for Chrome to load extension...');
     await delay(3000);
@@ -112,26 +112,55 @@ async function takeScreenshots() {
     let extensionId = process.argv[2];
 
     if (!extensionId) {
-      console.log('\n⏳ Attempting to auto-detect extension ID...');
-      extensionId = await findExtensionId(page);
-    }
+      console.log('⏳ Auto-detecting extension ID...');
 
-    if (!extensionId) {
-      console.log('\n⚠️  Could not auto-detect extension ID');
-      console.log('   Trying to find through service worker...\n');
+      // Try multiple methods to find the extension ID
 
+      // Method 1: Find through service worker pages
       const pages = await browser.pages();
       for (const p of pages) {
         const url = p.url();
         if (url.includes('chrome-extension://') && !url.includes('chrome://')) {
           extensionId = url.match(/chrome-extension:\/\/([^\/]+)\//)?.[1];
-          if (extensionId) break;
+          if (extensionId) {
+            console.log('✅ Found extension ID from service worker');
+            break;
+          }
         }
       }
+
+      // Method 2: Parse chrome://extensions/ page
+      if (!extensionId) {
+        const extPage = await browser.newPage();
+        try {
+          await extPage.goto('chrome://extensions/', { waitUntil: 'domcontentloaded' });
+          await delay(1000);
+
+          extensionId = await extPage.evaluate(() => {
+            // Find the extension element
+            const items = document.querySelectorAll('cr-view-manager div[id^="extension-"]');
+            if (items.length > 0) {
+              const id = items[0].id.replace('extension-', '');
+              return id;
+            }
+            return null;
+          });
+
+          if (extensionId) {
+            console.log('✅ Found extension ID from chrome://extensions/');
+          }
+        } catch (e) {
+          console.log('⚠️  Could not query chrome://extensions/');
+        } finally {
+          await extPage.close();
+        }
+      }
+    } else {
+      console.log(`✅ Using provided extension ID: ${extensionId}`);
     }
 
     if (!extensionId) {
-      console.error('\n❌ Error: Could not find extension ID');
+      console.error('\n❌ Error: Could not auto-detect extension ID');
       console.log('\n💡 To provide the extension ID manually:');
       console.log('   1. Go to chrome://extensions/');
       console.log('   2. Find your extension ID (e.g., "abc123def456...")');
