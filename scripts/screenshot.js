@@ -57,6 +57,9 @@ async function readCredentials() {
 
     if (credentials.aws_access_key_id && credentials.aws_secret_access_key) {
       console.log('✅ Loaded credentials from .aws/credentials');
+      if (credentials.bucket) {
+        console.log(`   Bucket: ${credentials.bucket}`);
+      }
       return credentials;
     }
   } catch (e) {
@@ -230,15 +233,21 @@ async function takeScreenshots() {
 
           if (accessKeyInput) {
             await accessKeyInput.type(credentials.aws_access_key_id, { delay: 50 });
+            console.log('   ✓ Access Key filled');
           }
           if (secretKeyInput) {
             await secretKeyInput.type(credentials.aws_secret_access_key, { delay: 50 });
+            console.log('   ✓ Secret Key filled');
           }
           if (regionInput && credentials.region) {
             await regionInput.type(credentials.region, { delay: 50 });
+            console.log('   ✓ Region filled');
           }
           if (bucketInput && credentials.bucket) {
             await bucketInput.type(credentials.bucket, { delay: 50 });
+            console.log('   ✓ Bucket filled');
+          } else if (bucketInput && !credentials.bucket) {
+            console.log('   ℹ️  Bucket not set (optional - will show bucket selector)');
           }
 
           // Save credentials
