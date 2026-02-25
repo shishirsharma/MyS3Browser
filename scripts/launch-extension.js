@@ -26,6 +26,7 @@ async function launchExtension() {
       `--disable-extensions-except=${EXTENSION_PATH}`,
       '--no-first-run',
       '--no-default-browser-check',
+      '--remote-debugging-port=9222',
     ],
     defaultViewport: null,
   });

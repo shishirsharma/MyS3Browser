@@ -55,16 +55,51 @@ async function takeScreenshots() {
   console.log('   ✓ Output directory:', OUTPUT_DIR);
   console.log('   ✓ Viewport size: 1280x800\n');
 
-  const browser = await puppeteer.launch({
-    headless: false,
-    args: [
-      `--load-extension=${EXTENSION_PATH}`,
-      `--disable-extensions-except=${EXTENSION_PATH}`,
-      '--no-first-run',
-      '--no-default-browser-check',
-    ],
-    defaultViewport: null,
-  });
+  let browser;
+  let isExistingBrowser = false;
+
+  // Try to connect to existing Chrome instance first
+  console.log('⏳ Attempting to connect to existing Chrome instance...');
+  try {
+    browser = await puppeteer.connect({
+      browserWSEndpoint: 'ws://127.0.0.1:9222/devtools/browser/...',
+      timeout: 2000,
+    }).catch(() => null);
+
+    if (!browser) {
+      // Try alternative endpoint format
+      const response = await fetch('http://127.0.0.1:9222/json/version', { timeout: 2000 }).catch(() => null);
+      if (response) {
+        const data = await response.json();
+        browser = await puppeteer.connect({
+          browserWSEndpoint: data.webSocketDebuggerUrl,
+          timeout: 2000,
+        }).catch(() => null);
+      }
+    }
+
+    if (browser) {
+      console.log('✅ Connected to existing Chrome instance!\n');
+      isExistingBrowser = true;
+    }
+  } catch (e) {
+    console.log('⚠️  Could not connect to existing instance, launching new one...\n');
+  }
+
+  // Launch new Chrome instance if no existing connection
+  if (!browser) {
+    browser = await puppeteer.launch({
+      headless: false,
+      args: [
+        `--load-extension=${EXTENSION_PATH}`,
+        `--disable-extensions-except=${EXTENSION_PATH}`,
+        '--no-first-run',
+        '--no-default-browser-check',
+        '--remote-debugging-port=9222',
+      ],
+      defaultViewport: null,
+    });
+  }
 
   try {
     const page = await browser.newPage();
@@ -200,8 +235,13 @@ async function takeScreenshots() {
     console.log('   3. Or use Mac Screenshot (Cmd+Shift+4)');
     console.log('   4. Save images to /screenshots folder');
   } finally {
-    console.log('\n🔌 Closing browser...');
-    await browser.close();
+    if (isExistingBrowser) {
+      console.log('\n✅ Keeping existing Chrome instance open for you to use.');
+      console.log('   (Press Ctrl+C in the launch window to close Chrome)\n');
+    } else {
+      console.log('\n🔌 Closing browser...');
+      await browser.close();
+    }
   }
 }
 
