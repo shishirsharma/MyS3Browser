@@ -29,9 +29,10 @@ function onDelete() {
     </td>
     <td class="text-muted">-</td>
     <td class="text-muted">-</td>
-    <td @click.stop>
-      <div class="btn-group btn-group-sm">
+    <td class="text-center" @click.stop>
+      <div class="btn-group btn-group-sm" role="group">
         <button
+          type="button"
           class="btn btn-outline-primary"
           title="Download"
           disabled
@@ -40,6 +41,25 @@ function onDelete() {
           <i class="bi bi-download"></i>
         </button>
         <button
+          type="button"
+          class="btn btn-outline-secondary"
+          title="Rename"
+          disabled
+          style="visibility: hidden;"
+        >
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          title="Copy Link"
+          disabled
+          style="visibility: hidden;"
+        >
+          <i class="bi bi-link-45deg"></i>
+        </button>
+        <button
+          type="button"
           class="btn btn-outline-danger"
           title="Delete Folder"
           @click="onDelete"

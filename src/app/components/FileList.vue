@@ -8,6 +8,8 @@ const emit = defineEmits<{
   downloadFile: [key: string];
   deleteFile: [key: string];
   deleteFolder: [prefix: string];
+  renameFile: [key: string];
+  shareFile: [key: string];
 }>();
 
 const s3Store = useS3Store();
@@ -61,6 +63,8 @@ const s3Store = useS3Store();
           :object="obj"
           @download="emit('downloadFile', $event)"
           @delete="emit('deleteFile', $event)"
+          @rename="emit('renameFile', $event)"
+          @share="emit('shareFile', $event)"
         />
       </tbody>
     </table>

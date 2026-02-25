@@ -9,6 +9,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   download: [key: string];
   delete: [key: string];
+  rename: [key: string];
+  share: [key: string];
 }>();
 
 const fileIcon = computed(() => {
@@ -63,6 +65,14 @@ function onDelete() {
     emit('delete', props.object.key);
   }
 }
+
+function onRename() {
+  emit('rename', props.object.key);
+}
+
+function onShare() {
+  emit('share', props.object.key);
+}
 </script>
 
 <template>
@@ -73,9 +83,10 @@ function onDelete() {
     </td>
     <td>{{ object.humanSize }}</td>
     <td>{{ formattedDate }}</td>
-    <td>
-      <div class="btn-group btn-group-sm">
+    <td class="text-center">
+      <div class="btn-group btn-group-sm" role="group">
         <button
+          type="button"
           class="btn btn-outline-primary"
           title="Download"
           @click="onDownload"
@@ -83,6 +94,23 @@ function onDelete() {
           <i class="bi bi-download"></i>
         </button>
         <button
+          type="button"
+          class="btn btn-outline-secondary"
+          title="Rename/Move"
+          @click="onRename"
+        >
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          title="Copy Link"
+          @click="onShare"
+        >
+          <i class="bi bi-link-45deg"></i>
+        </button>
+        <button
+          type="button"
           class="btn btn-outline-danger"
           title="Delete"
           @click="onDelete"

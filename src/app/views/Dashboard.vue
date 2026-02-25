@@ -12,6 +12,7 @@ import CredentialModal from '../modals/CredentialModal.vue';
 import UploadModal from '../modals/UploadModal.vue';
 import CreateFolderModal from '../modals/CreateFolderModal.vue';
 import HelpModal from '../modals/HelpModal.vue';
+import RenameModal from '../modals/RenameModal.vue';
 import type { Credential } from '@/types';
 
 const credentialsStore = useCredentialsStore();
@@ -23,6 +24,8 @@ const editingCredential = ref<Credential | null>(null);
 const showUploadModal = ref(false);
 const showCreateFolderModal = ref(false);
 const showHelpModal = ref(false);
+const showRenameModal = ref(false);
+const renamingObject = ref<typeof s3Store.filteredObjects[number] | null>(null);
 
 // Alert state
 const alertMessage = ref<string | null>(null);
@@ -190,6 +193,48 @@ async function deleteFolder(prefix: string) {
   }
 }
 
+function openRenameModal(key: string) {
+  const object = s3Store.filteredObjects.find(o => o.key === key);
+  if (object) {
+    renamingObject.value = object;
+    showRenameModal.value = true;
+  }
+}
+
+async function onRenameCompleted() {
+  showRenameModal.value = false;
+  await loadObjects();
+  showAlert('File operation completed successfully', 'success');
+  if (s3Store.currentBucket) {
+    const anonymousBucketId = await getAnonymousBucketId(s3Store.currentBucket);
+    trackEvent('s3_action', { action: 'file_renamed_or_moved', bucket_id: anonymousBucketId });
+  }
+}
+
+async function shareFile(key: string) {
+  if (!credentialsStore.activeCredential || !s3Store.currentBucket) return;
+
+  try {
+    const bucketRegion = s3Store.getBucketRegion(s3Store.currentBucket);
+    const url = await s3Service.getDownloadUrl(
+      credentialsStore.activeCredential,
+      s3Store.currentBucket,
+      key,
+      3600,
+      bucketRegion
+    );
+    await navigator.clipboard.writeText(url);
+    showAlert('Link copied to clipboard! Expires in 1 hour.', 'success');
+    const anonymousBucketId = await getAnonymousBucketId(s3Store.currentBucket);
+    const anonymousFileId = await getAnonymousFileId(key);
+    trackEvent('s3_action', { action: 'file_shared', bucket_id: anonymousBucketId, file_id: anonymousFileId });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'Failed to copy link to clipboard';
+    showAlert(message, 'danger');
+    trackError('Failed to share file', e instanceof Error ? e.stack : undefined);
+  }
+}
+
 async function nextPage() {
   if (!s3Store.nextToken) return;
   s3Store.pushPrevToken(s3Store.nextToken);
@@ -353,6 +398,8 @@ async function initializeDashboard() {
             @download-file="downloadFile"
             @delete-file="deleteFile"
             @delete-folder="deleteFolder"
+            @rename-file="openRenameModal"
+            @share-file="shareFile"
           />
         </div>
 
@@ -404,6 +451,13 @@ async function initializeDashboard() {
     <HelpModal
       :show="showHelpModal"
       @close="showHelpModal = false"
+    />
+
+    <RenameModal
+      :show="showRenameModal"
+      :object="renamingObject"
+      @close="showRenameModal = false"
+      @completed="onRenameCompleted"
     />
   </div>
 </template>

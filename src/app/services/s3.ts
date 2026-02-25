@@ -6,6 +6,7 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   GetBucketLocationCommand,
+  CopyObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { Credential, BucketInfo, S3ListResult, S3Object, S3Folder } from '@/types';
@@ -263,4 +264,25 @@ export async function downloadObject(
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+}
+
+export async function copyObject(
+  credential: Credential,
+  sourceBucket: string,
+  sourceKey: string,
+  destBucket: string,
+  destKey: string,
+  bucketRegion?: string
+): Promise<void> {
+  const client = bucketRegion
+    ? createClientForRegion(credential, bucketRegion)
+    : initializeClient(credential);
+
+  const command = new CopyObjectCommand({
+    Bucket: destBucket,
+    CopySource: `${sourceBucket}/${sourceKey}`,
+    Key: destKey,
+  });
+
+  await client.send(command);
 }
