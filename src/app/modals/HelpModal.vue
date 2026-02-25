@@ -162,7 +162,7 @@ function setActiveTab(tab: string) {
                 </div>
               </div>
 
-              <h6 class="mb-3">File Operations (Phase 1)</h6>
+              <h6 class="mb-3">File Operations</h6>
               <div class="row">
                 <div class="col-md-6">
                   <ul>
