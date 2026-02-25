@@ -31,6 +31,40 @@ if (!fs.existsSync(OUTPUT_DIR)) {
 // Helper function to replace deprecated waitForTimeout
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+// Helper function to read AWS credentials from .aws/credentials file
+async function readCredentials() {
+  const credentialsPath = path.resolve(__dirname, '../.aws/credentials');
+  try {
+    if (!fs.existsSync(credentialsPath)) {
+      console.log('⚠️  No .aws/credentials file found');
+      return null;
+    }
+
+    const content = fs.readFileSync(credentialsPath, 'utf-8');
+    const credentials = {};
+
+    // Parse INI format
+    const lines = content.split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('[')) continue;
+
+      const [key, value] = trimmed.split('=').map(s => s.trim());
+      if (key && value) {
+        credentials[key] = value;
+      }
+    }
+
+    if (credentials.aws_access_key_id && credentials.aws_secret_access_key) {
+      console.log('✅ Loaded credentials from .aws/credentials');
+      return credentials;
+    }
+  } catch (e) {
+    console.log('⚠️  Could not read credentials:', e.message);
+  }
+  return null;
+}
+
 async function findExtensionId(page) {
   try {
     await page.goto('chrome://extensions/', { waitUntil: 'networkidle2' });
@@ -175,6 +209,51 @@ async function takeScreenshots() {
 
     console.log('📍 Navigating to extension popup...');
     await page.goto(extensionUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await delay(2000);
+
+    // Try to load credentials and add them to extension
+    const credentials = await readCredentials();
+    if (credentials) {
+      console.log('🔐 Adding credentials to extension...');
+      try {
+        // Click the credential dropdown to add new credential
+        const addBtn = await page.$('button[title*="credential"], button:has-text("Add"), .btn-primary');
+        if (addBtn) {
+          await addBtn.click();
+          await delay(500);
+
+          // Fill in the form
+          const accessKeyInput = await page.$('input[placeholder*="Access"], input[placeholder*="access"]');
+          const secretKeyInput = await page.$('input[placeholder*="Secret"], input[placeholder*="secret"]');
+          const regionInput = await page.$('input[placeholder*="Region"], input[placeholder*="region"]');
+          const bucketInput = await page.$('input[placeholder*="Bucket"], input[placeholder*="bucket"]');
+
+          if (accessKeyInput) {
+            await accessKeyInput.type(credentials.aws_access_key_id, { delay: 50 });
+          }
+          if (secretKeyInput) {
+            await secretKeyInput.type(credentials.aws_secret_access_key, { delay: 50 });
+          }
+          if (regionInput && credentials.region) {
+            await regionInput.type(credentials.region, { delay: 50 });
+          }
+          if (bucketInput && credentials.bucket) {
+            await bucketInput.type(credentials.bucket, { delay: 50 });
+          }
+
+          // Save credentials
+          const saveBtn = await page.$('button:has-text("Save"), button.btn-primary');
+          if (saveBtn) {
+            await saveBtn.click();
+            await delay(2000);
+            console.log('✅ Credentials added successfully');
+          }
+        }
+      } catch (e) {
+        console.log('⚠️  Could not auto-add credentials:', e.message);
+      }
+    }
+
     await delay(2000);
 
     // Screenshot 1: Main browser view (no credentials state)
