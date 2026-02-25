@@ -121,19 +121,19 @@ function setActiveTab(tab: string) {
               <h6 class="mb-3 mt-4">File Action Buttons</h6>
               <p class="small text-muted mb-3">Each file has four action buttons:</p>
               <div class="mb-2">
-                <span class="badge bg-primary"><i class="bi bi-download"></i></span>
+                <span class="badge bg-primary me-2"><i class="bi bi-download"></i></span>
                 <span class="small">Download - Save file to your computer</span>
               </div>
               <div class="mb-2">
-                <span class="badge bg-secondary"><i class="bi bi-pencil"></i></span>
+                <span class="badge bg-secondary me-2"><i class="bi bi-pencil"></i></span>
                 <span class="small">Rename/Move - Rename or move file to another folder</span>
               </div>
               <div class="mb-2">
-                <span class="badge bg-secondary"><i class="bi bi-link-45deg"></i></span>
+                <span class="badge bg-secondary me-2"><i class="bi bi-link-45deg"></i></span>
                 <span class="small">Copy Link - Generate shareable URL (expires in 1 hour)</span>
               </div>
               <div>
-                <span class="badge bg-danger"><i class="bi bi-trash"></i></span>
+                <span class="badge bg-danger me-2"><i class="bi bi-trash"></i></span>
                 <span class="small">Delete - Permanently remove file</span>
               </div>
             </div>
@@ -163,39 +163,17 @@ function setActiveTab(tab: string) {
               </div>
 
               <h6 class="mb-3">File Operations (Phase 1)</h6>
-              <div class="card bg-light mb-3">
-                <div class="card-body">
-                  <h6 class="card-subtitle mb-2">
-                    <i class="bi bi-pencil-square text-secondary me-2"></i>
-                    Rename Files
-                  </h6>
-                  <p class="card-text small text-muted mb-0">
-                    Rename files within the current folder. The file is copied to the new name and the original is deleted.
-                  </p>
+              <div class="row">
+                <div class="col-md-6">
+                  <ul>
+                    <li><i class="bi bi-pencil-square text-secondary me-1"></i>Rename Files</li>
+                    <li><i class="bi bi-files text-secondary me-1"></i>Copy & Move Files</li>
+                  </ul>
                 </div>
-              </div>
-
-              <div class="card bg-light mb-3">
-                <div class="card-body">
-                  <h6 class="card-subtitle mb-2">
-                    <i class="bi bi-files text-secondary me-2"></i>
-                    Copy & Move Files
-                  </h6>
-                  <p class="card-text small text-muted mb-0">
-                    Copy files to different folders or rename them during copy. Toggle "Delete original" to move files instead of copying.
-                  </p>
-                </div>
-              </div>
-
-              <div class="card bg-light">
-                <div class="card-body">
-                  <h6 class="card-subtitle mb-2">
-                    <i class="bi bi-link-45deg text-secondary me-2"></i>
-                    Share Files (Pre-signed URLs)
-                  </h6>
-                  <p class="card-text small text-muted mb-0">
-                    Generate shareable links with 1-hour expiration. Click the link button to copy to clipboard and share with others.
-                  </p>
+                <div class="col-md-6">
+                  <ul>
+                    <li><i class="bi bi-link-45deg text-secondary me-1"></i>Share Files (Pre-signed URLs)</li>
+                  </ul>
                 </div>
               </div>
             </div>
